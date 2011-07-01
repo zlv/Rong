@@ -17,8 +17,7 @@ SOURCES += \
     windowfield.cpp \
     main.cpp \
     platform.cpp \
-    ball.cpp \
-    func.cpp
+    ball.cpp
 
 OTHER_FILES += \
     баги
