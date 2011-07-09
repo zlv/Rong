@@ -16,47 +16,48 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#include "field.h" //этот класс
-#include "ball.h"
-#include "circleofdeath.h"
-#include "player.h"
-#include "noviceai.h"
-#include "score.h"
+#include "noviceai.h" //it's me
+#include "circleofdeath.h" //круг смерти
+#include "platform.h" //вагонетка
+#include "constants.h" //пи
+#include <math.h>
 
-Field::Field()
+const double NoviceAI::novicedang=PI/36;
+
+NoviceAI::NoviceAI(Field* f, int p) : Gamer(f,p,AI),direction(0){}
+
+void NoviceAI::timerTickd(int)
 {
-    ball_ = new Ball(this,2,4);
-    circle_ = new CircleOfDeath(this);
-    gamer_[0] = new Player(this,0);
-    gamer_[1] = new NoviceAI(this,1);
-    //нулевой игрок слушает нажатия мыши, а также стрелки, второй игрок --
-    gamer_[0]->setMousePressListening(); //это бот, он слушает таймер
-    gamer_[1]->setMouseMovedListening();
-    gamer_[0]->setKeyrdArrowListening();
-    gamer_[1]->setTimerTickdListening();
-    score_ = new Score(this); //панель со счётом
+    if (listening_&timerTickdListening && direction)
+        field_->circle()->platform(platform_)->changeAngle(dang*direction);
 }
 
-/*================================
-====      Открытые функции      ====
-  ================================*/
-
-CircleOfDeath* Field::circle() //круг смерти
+//изменить переменные
+void NoviceAI::changeDirection(QPointF& p, double angle)
 {
-    return circle_;
+    mutex.lock();
+    ballPoint_ = p;
+    angle_ = angle;
+    mutex.unlock();
 }
 
-Gamer* Field::gamer(int i) //итый игрок
+//работа мозга бота во время которой он решает куда ему двигаться дальше
+void NoviceAI::run()
 {
-    return gamer_[i];
-}
-
-Ball* Field::ball() //мячик
-{
-    return ball_;
-}
-
-Score * Field::score() //панель счёта
-{
-    return score_;
+    while (1)
+    {
+        mutex.lock();
+        double tempAngle; //вычислить угол
+        tempAngle = acos(ballPoint_.x()/sqrt(ballPoint_.y()*ballPoint_.y()
+                                         +ballPoint_.x()*ballPoint_.x()));
+        tempAngle = field_->circle()->limiter(platform_)+(platform_?
+                                    PI-tempAngle:tempAngle);
+        //разница текущего угла и угла, нужного чтобы отбить мячик
+        double delta = tempAngle-angle_;
+        if (fabs(delta)>novicedang)
+            direction = delta>0?1:-1;
+        else
+            direction = 0;
+        mutex.unlock();
+    }
 }

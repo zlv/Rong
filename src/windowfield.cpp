@@ -17,24 +17,28 @@
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #include "windowfield.h" //this class
-#include <QGraphicsView>
+#include "ball.h" //мячик
+#include "circleofdeath.h" //круг смерти
+#include "platform.h"
+#include "noviceai.h"
+#include "score.h"
 #include <QMouseEvent>
-#include "ball.h"
-#include "circleofdeath.h"
-#include "gamer.h"
 
 WindowField::WindowField()
 {
     //добавить элементы
     scene_.addItem(circle_);
     scene_.addItem(ball_);
+    scene_.addItem(score_);
     /*создать виджет, размещающий объекты и обрабатывающий события мыши и
     клавиатуры*/
     View* view = new View(&scene_,this);
     view->show();
     setCentralWidget(view);
-    setMouseTracking(1);
-    startTimer(3);
+    startTimer(10); //таймер
+    connect(this,SIGNAL(goBot(QPointF&,double)), //для бота
+            (gamer_[1]),SLOT(changeDirection(QPointF&,double)));
+    gamer_[1]->start(); //включить бота
 }
 
 void WindowField::update() //обновить виджет-сцену / update scene widget
@@ -43,9 +47,13 @@ void WindowField::update() //обновить виджет-сцену / update s
 }
 
 //основной таймер приложения
-void WindowField::timerEvent(QTimerEvent *)
+void WindowField::timerEvent(QTimerEvent*)
 {
     ball_->moveMe(); //двигать мяч
+    QPointF point=ball_->point(); //сообщить боту где мяч, и где его ваго-
+    emit goBot(point,circle_->platform(1)->angle()); //нетка
+    for (int i=0; i<2; i++) //сообщить каждому игроку об изменении времени
+        gamer(i)->timerTickd(0);
     scene_.update();
 }
 
@@ -63,7 +71,6 @@ void View::mousePressEvent(QMouseEvent *e) //кнопка мыши
     QPointF point = e->posF()-QPointF(xinc,yinc); //текущая точка
     for (int i=0; i<2; i++) //сообщить каждому игроку
         field_->gamer(i)->mousePress(point);
-    field_->update();
 }
 
 void View::mouseMoveEvent(QMouseEvent *e)
@@ -74,10 +81,9 @@ void View::mouseMoveEvent(QMouseEvent *e)
     for (int i=0; i<2; i++) //сообщить каждому игроку
     {
         field_->gamer(i)->mouseMoved(point);
-        if (!mousePressed_) continue;
+        if (!mousePressed_) continue; //кнопка мыши не зажата
         field_->gamer(i)->mousePress(point);
     }
-    field_->update();
 }
 
 void View::mouseReleaseEvent(QMouseEvent *)
@@ -89,5 +95,4 @@ void View::keyPressEvent(QKeyEvent *e)
 {
     for (int i=0; i<2; i++) //сообщить каждому игроку
         field_->gamer(i)->keyPressed(e->key());
-    field_->update();
 }

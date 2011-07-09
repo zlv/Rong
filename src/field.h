@@ -25,22 +25,33 @@
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #ifndef FIELD_H
 #define FIELD_H
+#include <vector>
 
 class Ball; //мячик, объявлен в другом месте / declaration is not here
 class CircleOfDeath; //круг смерти тоже
 class Gamer; //и он тоже
+class Bonus;
+class BonusBall;
+class Score;
 class Field
 {
 protected:
     Ball *ball_; //мячик
     CircleOfDeath *circle_; //круг
     Gamer *gamer_[2]; //игроки
+    Bonus **bonuses_;
+    std::vector<BonusBall*> bonusBalls_;
+    Score *score_;
 public:
+    //выводить ненужную информацию, а также вспомогательные линии
+    static const bool debug=0;
 
     Field();
     //функции доступа
+    Ball* ball();
     CircleOfDeath* circle();
     Gamer* gamer(int);
+    Score* score();
 };
 
 #endif // FIELD_H

@@ -23,26 +23,21 @@
 #include <QDebug>
 #include "constants.h"
 #include "circleofdeath.h"
-Ball::Ball(Field *f, QGraphicsItem *parent)  :
+#include "platform.h"
+#include "score.h"
+Ball::Ball(Field *f, double vx, double vy, QGraphicsItem *parent)  :
     QGraphicsItem
-    (parent), radius_(10), point_(0,0),
-    field_(f), pixmap_(22,22), painted_(0)
+    (parent), radius_(30), point_(0,0),
+    field_(f), pixmap_(62,62), painted_(0),
+    color_(BLUE), vx_(vx),vy_(vy), type(GameBall)
 {
-
-    pixmap_.fill(Qt::transparent);
-    QPainter* p = new QPainter(&pixmap_);
-    QBrush br;
-    QPen pen;
-    pen.setStyle(Qt::NoPen);
-    br.setColor(Qt::blue);
-    br.setStyle(Qt::SolidPattern);
-    p->setPen(pen);
-    p->setBrush(br);
-    p->setRenderHint(QPainter::Antialiasing,true);
-    p->drawEllipse(QPointF(radius_,radius_),static_cast<int>(radius_),
-                          static_cast<int>(radius_));
-    delete p;
+    drawBall();
 }
+
+Ball::Ball(Field *f, double vx, double vy, Type t, QString& sImg, QGraphicsItem *parent)
+    : QGraphicsItem(parent), radius_(32), point_(0,0),
+    field_(f), pixmap_(sImg), painted_(0),
+    color_(BLUE), vx_(vx), vy_(vy), type(t){}
 
 /*================================
 ===    Унаследованные функции    ===
@@ -50,25 +45,33 @@ Ball::Ball(Field *f, QGraphicsItem *parent)  :
 
 QRectF Ball::boundingRect() const //регион отсечения
 {
-    return QRectF(-radius_, -radius_,
-                   radius_*2,radius_*2);
-}
-
-//рисование мячика
-void Ball::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget*)
-{
-
-    p->drawPixmap(QPoint(point_.x()-radius_,point_.y()-radius_),pixmap_);
-    painted_ = 1;
+    double radius = field_->circle()->radius(); //радиус круга смерти
+    double max = radius/CircleOfDeath::neededRadius/4; //увеличение
+    return QRectF(point_.x()-radius_, point_.y()-radius_,
+                   radius_*2*max,radius_*2*max);
 }
 
 //форма фигуры (для сравнивания)
 QPainterPath Ball::shape() const
 {
     QPainterPath path;
-    path.addEllipse(point_,static_cast<int>(radius_),
-                           static_cast<int>(radius_));
+    double radius = field_->circle()->radius(); //радиус круга смерти
+    double max = radius/CircleOfDeath::neededRadius/4; //увеличение
+    path.addEllipse(point_.x()-radius_, point_.y()-radius_,
+                    radius_*2*max,radius_*2*max);
     return path;
+}
+
+//рисование мячика
+void Ball::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget*)
+{
+    double radius = field_->circle()->radius(); //радиус круга смерти
+    double max = radius/CircleOfDeath::neededRadius/4; //увеличение
+    QRectF target(point_.x()-radius_,point_.y()-radius_,
+                  radius_*2*max,radius_*2*max);
+    QRectF source(0,0,radius_*2,radius_*2);
+    p->drawPixmap(target,pixmap_,source);
+    painted_ = 1;
 }
 
 /*================================
@@ -79,161 +82,286 @@ QPainterPath Ball::shape() const
 void Ball::moveMe()
 {
     if (!painted_) return;
+
     //проекции оси движения на оси X и Y
-    static double x=0.8,y=0.9;
-    //если перетаёт пересекаться с кругом смерти
-    if (!collidesWithItem(field_->circle(),Qt::ContainsItemShape))
+    //если перестаёт пересекаться с кругом смерти
+    bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);
+    bool crossPlatform[2];
+    for (int i=0; i<2; i++)
+    {
+        crossPlatform[i] = collidesWithItem(field_->circle()->platform(i));
+    }
+    if (crossBorder || crossPlatform[0] || crossPlatform[1])
     {
         //модуль вектора движения(равен модулю векторов отражения и падения)
-        double length = sqrt(x*x+y*y);
-        //угол падающего вектора к оси X
-        double angle;
         //угол касательной к окружности в точке соприкосновения
-        double arc=acos(point_.y()/(sqrt(point_.x()*point_.x()+point_.y()*point_.y())));
-        //который не больше 90
-        arc=(arc>PI/2?PI-arc:arc);
-        //правая-нижняя часть круга смерти
-        if (point_.x()>0 && point_.y()>=0)
+        double arc;
+        if(crossPlatform[0] || crossPlatform[1])
         {
-            //если движется вправо
-            if (x>=0)
+            if(crossPlatform[0])
             {
-                //угол вектора отражения к оси X
-                angle=acos(x/length)+2*arc;
-                //проекция отраженного вектора на ось X
-                x = length*cos(angle);
-                //если движется вниз
-                if(y<0)
+                //смена цвета мяча
+                if (color_==WHITE)
                 {
-                   //угол вектора отражения к оси X
-                   angle=acos(x/length)+arc;
+                    color_ = RED;
+                    drawBall();
                 }
-                //проекция отраженного вектора на ось Y
-                y =-length*sin(angle);
+                else if (color_!=RED)
+                {
+                    changeColor();
+                    color_ = RED;
+                }
+                arc=field_->circle()->platform(0)->angleTox();
             }
-            //если движется влево
             else
             {
-                //угол вектора отражения к оси X
-                angle=acos(-x/length)-arc;
-                //проекция отраженного вектора на ось X
-                x =-length*cos(angle);
-                //проекция отраженного вектора на ось Y
-                y =-length*sin(angle);
+                //смена цвета мяча
+                if (color_==WHITE)
+                {
+                    color_ = BLUE;
+                    drawBall();
+                }
+                else if (color_!=BLUE)
+                {
+                    changeColor();
+                    color_ = BLUE;
+                }
+                arc=field_->circle()->platform(1)->angleTox();
             }
         }
         else
-            //правая верхняя часть круга смерти
-            if (point_.x()>0 && point_.y()<0)
+        {
+            arc=acos(point_.y()/(sqrt(point_.x()*point_.x()+point_.y()*point_.y())));
+            BallColor circleColor = static_cast<BallColor>(field_->circle()->getColor(point_));
+            //смена цвета мяча, а также реагирование на попадание не
+            if (circleColor!=color_) //в свою часть круга смерти
             {
-                if (x>=0)
+                if (color_==WHITE)
                 {
-                    if(y<0)
+                    color_ = circleColor;
+                    drawBall();
+                }
+                else
+                {
+                    field_->score()->inc(color_);
+                    color_ = WHITE;
+                    drawBall();
+                }
+            }
+        }
+        //который не больше 90
+        arc=(arc>PI/2?PI-arc:arc);
+        qDebug()<<arc*180/PI;
+        //правая-нижняя часть круга смерти
+        mirror(arc);
+    }
+    //изменение координат летающего круга в соответствии с вектором движения
+    point_=QPointF(point_.x()+vx_,point_.y()+vy_);
+}
+
+
+QPointF Ball::point()
+{
+    return point_;
+}
+
+void Ball::mirror(double arc)
+{
+    double length = sqrt(vx_*vx_+vy_*vy_);
+    //угол падающего вектора к оси X
+    double angle;
+    if (point_.x()>0 && point_.y()>=0)
+    {
+        //если движется вправо
+        if (vx_>=0)
+        {
+            if(vy_>0)//если движется вниз
+            {
+                //угол вектора отражения к оси X
+                angle=acos(vx_/length)+2*arc;
+                //проекция отраженного вектора на ось X
+                vx_ = length*cos(angle);
+                //проекция отраженного вектора на ось Y
+                vy_ =-length*sin(angle);
+            }
+            else
+            {
+                angle=-PI/2+(PI-acos(vy_/length))+2*arc;
+                qDebug()<<angle*180/PI<<' '<<(PI-acos(vy_/length))*180/PI<<' '<<arc*180/PI;
+                //проекция отраженного вектора на ось X
+                vx_ = length*cos(angle);
+                //проекция отраженного вектора на ось Y
+                vy_ = -length*sin(angle);
+
+            }
+
+        }
+        //если движется влево
+        else
+        {
+            if(vy_>0)
+            {
+            //угол вектора отражения к оси X
+            angle=-(PI-acos(vx_/length))+2*arc;
+            //проекция отраженного вектора на ось X
+            vx_ =-length*cos(angle);
+            //проекция отраженного вектора на ось Y
+            vy_ =-length*sin(angle);
+            }
+            else
+            {
+                //угол вектора отражения к оси X
+                angle=acos(vx_/length)+2*arc;
+                //проекция отраженного вектора на ось X
+                vx_ =-length*cos(angle);
+                //проекция отраженного вектора на ось Y
+                vy_ =-length*sin(angle);
+            }
+
+        }
+    }
+    else
+        //правая верхняя часть круга смерти
+        if (point_.x()>0 && point_.y()<0)
+        {
+            if (vx_>=0)
+            {
+                if(vy_<0)
+                {
+                    angle=2*arc+acos(vx_/length);
+                    vx_ =length*cos(angle);
+                    vy_ =length*sin(angle);
+                }
+                else
+                {
+                    angle=PI/2+acos(vx_/length)-2*arc;
+                    vx_ =length*sin(angle);
+                    vy_ =length*cos(angle);
+                }
+
+            }
+            else
+            {
+                if(vy_<0)
+                {
+                    angle=arc-acos(-vx_/length);
+                    vx_ =-length*cos(angle);
+                    vy_ =-length*sin(angle);
+                }
+                else
+                {
+                    angle=acos(vy_/length)-arc;
+                    vx_ =-length*cos(angle);
+                    vy_ =-length*sin(angle);
+                }
+
+            }
+        }
+        else
+            //левая верхняя часть круга смерти
+            if (point_.x()<0 && point_.y()<0)
+            {
+                if (vx_>=0)
+                {
+                    if(vy_<0)
                     {
-                        angle=2*arc+acos(x/length);
-                        x =length*cos(angle);
-                        y =length*sin(angle);
+                        angle=arc-acos(vx_/length);
+                        vx_ = length*cos(angle);
+                        vy_ =-length*sin(angle);
                     }
                     else
                     {
-                        angle=PI/2+acos(x/length)-2*arc;
-                        x =length*sin(angle);
-                        y =length*cos(angle);
+                        angle=acos(vx_/length)-arc;
+                        vx_ =length*cos(angle);
+                        vy_ =-length*sin(angle);
                     }
 
                 }
                 else
                 {
-                    if(y<0)
+                    if(vy_<0)
                     {
-                        angle=arc-acos(-x/length);
-                        x =-length*cos(angle);
-                        y =-length*sin(angle);
+                        angle=-acos(-vy_/length)-PI/2+2*arc;
+                        vx_ =length*cos(angle);
+                        vy_ =-length*sin(angle);
                     }
                     else
                     {
-                        angle=acos(y/length)-arc;
-                        x =-length*cos(angle);
-                        y =-length*sin(angle);
+                        angle=-acos(-vx_/length)+2*arc;
+                        vx_ =-length*cos(angle);
+                        vy_ =length*sin(angle);
                     }
 
                 }
             }
             else
-                //левая верхняя часть круга смерти
-                if (point_.x()<0 && point_.y()<0)
+                //левая нижняя часть круга смерти
+                if (point_.x()<0 && point_.y()>0)
                 {
-                    if (x>=0)
+                    if (vx_>=0)
                     {
-                        if(y<0)
+                        if(vy_<0)
                         {
-                            angle=arc-acos(x/length);
-                            x = length*cos(angle);
-                            y =-length*sin(angle);
+                            angle=acos(vx_/length)+2*arc;
+                            vx_ =length*cos(angle);
+                            vy_ =-length*sin(angle);
                         }
                         else
                         {
-                            angle=acos(x/length)-arc;
-                            x =length*cos(angle);
-                            y =-length*sin(angle);
+                            angle=-acos(vx_/length)+2*arc;
+                            vx_ =length*cos(angle);
+                            vy_ =length*sin(angle);
                         }
 
                     }
                     else
                     {
-                        if(y<0)
+                        if(vy_<0)
                         {
-                            angle=-acos(-y/length)-PI/2+2*arc;
-                            x =length*cos(angle);
-                            y =-length*sin(angle);
+                            angle=2*arc-acos(-vx_/length);
+                            vx_ =-length*cos(angle);
+                            vy_ =-length*sin(angle);
                         }
                         else
                         {
-                            angle=-acos(-x/length)+2*arc;
-                            x =-length*cos(angle);
-                            y =length*sin(angle);
+                            angle=PI-acos(-vx_/length)-2*arc;
+                            vx_ =length*cos(angle);
+                            vy_ =-length*sin(angle);
                         }
 
                     }
                 }
-                else
-                    //левая нижняя часть круга смерти
-                    if (point_.x()<0 && point_.y()>0)
-                    {
-                        if (x>=0)
-                        {
-                            if(y<0)
-                            {
-                                angle=acos(x/length);
-                                x =length*cos(angle);
-                                y =length*sin(angle);
-                            }
-                            else
-                            {
-                                angle=acos(x/length)-arc;
-                                x =length*cos(angle);
-                                y =-length*sin(angle);
-                            }
+}
 
-                        }
-                        else
-                        {
-                            if(y<0)
-                            {
-                                angle=2*arc-acos(-x/length);
-                                x =-length*cos(angle);
-                                y =-length*sin(angle);
-                            }
-                            else
-                            {
-                                angle=PI-acos(-x/length)-2*arc;
-                                x =length*cos(angle);
-                                y =-length*sin(angle);
-                            }
+//изменить цвет мяча
+void Ball::changeColor()
+{
+    if (color_==BLUE)
+        color_ = RED;
+    else if (color_== RED)
+        color_ =BLUE;
+    drawBall();
+}
 
-                        }
-                    }
-    }
-    //изменение координат летающего круга в соответствии с вектором движения
-    point_=QPointF(point_.x()+x,point_.y()+y);
+//нарисовать мячик с новым цветом
+void Ball::drawBall()
+{
+    pixmap_.fill(Qt::transparent);
+    QPainter* p = new QPainter(&pixmap_);
+    QBrush br;
+    QPen pen;
+    pen.setStyle(Qt::NoPen);
+    if (color_==RED)
+        br.setColor(Qt::red);
+    else if (color_==BLUE)
+        br.setColor(Qt::blue);
+    else
+        br.setColor(Qt::gray);
+    br.setStyle(Qt::SolidPattern);
+    p->setPen(pen);
+    p->setBrush(br);
+    p->setRenderHint(QPainter::Antialiasing,true);
+    p->drawEllipse(QPointF(radius_,radius_),static_cast<int>(radius_),
+                          static_cast<int>(radius_));
+    delete p;
 }

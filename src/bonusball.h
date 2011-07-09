@@ -1,4 +1,9 @@
 /*=========================================================================
+==                             bonusball.h                               ==
+==   BonusBall -- сын Ball'а, является мячиком, несущим в себе сюрприз,  ==
+== а конкретнее бонус. /                                                 ==
+==                                                                       ==
+==   BonusBall -- ball that contains bonus.                              ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -16,17 +21,14 @@
 =========================================================================*/
 /*Авторы/Authors: pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь
                        zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь*/
-#include <QApplication>
-#include "windowfield.h"
+#ifndef BONUSBALL_H
+#define BONUSBALL_H
+#include "ball.h" //родитель
 
-int main(int argc, char **argv)
+class BonusBall : public Ball
 {
-    QApplication app(argc,argv);
+public:
+    BonusBall(Field*,double,double,Type,QString&,QGraphicsItem *parent=0);
+};
 
-    WindowField window;
-    window.setBaseSize(800,600);
-    window.setGeometry(50,50,800,600);
-    window.show();
-
-    return app.exec();
-}
+#endif // BONUSBALL_H

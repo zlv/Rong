@@ -16,12 +16,9 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#include "player.h"
+#include "player.h" //это мы
 #include "circleofdeath.h"
 #include "platform.h"
-#include "constants.h"
-
-const double Player::dang=PI/72; //изменение угла / delta angle
 
 Player::Player(Field* f, int p) : Gamer(f,p,Human){}
 

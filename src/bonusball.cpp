@@ -1,5 +1,4 @@
 /*=========================================================================
-==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
 ==  the Free Software Foundation, either version 3 of the License, or    ==
@@ -16,17 +15,8 @@
 =========================================================================*/
 /*Авторы/Authors: pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь
                        zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь*/
-#include <QApplication>
-#include "windowfield.h"
+#include "bonusball.h"
 
-int main(int argc, char **argv)
-{
-    QApplication app(argc,argv);
-
-    WindowField window;
-    window.setBaseSize(800,600);
-    window.setGeometry(50,50,800,600);
-    window.show();
-
-    return app.exec();
-}
+BonusBall::BonusBall(Field* f, double vx, double vy, Type t,
+                     QString& sImg, QGraphicsItem *parent)
+    : Ball(f,vx,vy,t,sImg,parent){}

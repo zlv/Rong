@@ -40,6 +40,10 @@ class CircleOfDeath : public QGraphicsItem
     Field *field_; //связующее поле
 public:
     static const double limitEmptySpace; //ширина ограничителей
+    /*эталонный радиус окружности смерти; радиус круга смерти сравнивается
+    с этой константой, и увеличивается или уменьшается /
+      radius of the circle of death, that affects on the platform size*/
+    static const double neededRadius;
 
     CircleOfDeath(Field *f, QGraphicsItem *parent = 0);
     //унаследованные функции
@@ -48,8 +52,10 @@ public:
     void paint(QPainter*,const QStyleOptionGraphicsItem *, QWidget*);
     //функции доступа
     double radius();
-    double limiter(int);
+    double limiter(int) const;
     Platform* platform(int);
+    //вернуть номер вагонетки по одной точке
+    int getColor(QPointF&);
 };
 
 #endif // CIRCLEOFDEATH_H

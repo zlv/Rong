@@ -17,12 +17,19 @@
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #include "circleofdeath.h" //этот класс
-#include <QPainter> //рисование
-#include <QWidget>  //размеры окна
 #include "constants.h" //Пи
 #include "platform.h" //вагонетки
+#include "ball.h" //мяч нужен для определения контуров
+#include <QPainter> //рисование
+#include <QWidget>  //размеры окна
+#include <math.h>
 
 const double CircleOfDeath::limitEmptySpace = PI/36; //ширина ограничителей
+
+/*эталонный радиус окружности смерти; радиус круга смерти сравнивается
+с этой константой, и увеличивается или уменьшается /
+  radius of the circle of death, that affects on the platform size*/
+const double CircleOfDeath::neededRadius = 250;
 
 CircleOfDeath::CircleOfDeath(Field *f, QGraphicsItem *parent) :
     QGraphicsItem(parent), radius_(0), field_(f)
@@ -41,7 +48,7 @@ QRectF CircleOfDeath::boundingRect() const //регион отсечения
 {
     qreal penWidth = 1;
     return QRectF(-radius_-penWidth/2,-radius_-penWidth/2,
-                   radius_*2+penWidth, radius_*2+penWidth);
+                  radius_*2+penWidth, radius_*2+penWidth);
 }
 
 //форма фигуры (для сравнивания)
@@ -77,7 +84,20 @@ void CircleOfDeath::paint(QPainter *p, const QStyleOptionGraphicsItem *,
         p->setPen(pen);
         p->drawArc(-radius_,-radius_,radius_*2,radius_*2,alpha[i*2],
                    (alpha[i*2+1]<0?(5760+alpha[i*2+1]):alpha[i*2+1])-
-                    alpha[i*2]);
+                   alpha[i*2]);
+    }
+    if  (Field::debug)
+    {
+        pen.setWidth(1);
+        p->setPen(pen);
+        p->drawRect(platform(0)->boundingRect());
+        p->drawRect(platform(1)->boundingRect());
+        p->drawRect(boundingRect());
+        p->drawRect(field_->ball()->boundingRect());
+        p->drawPath(platform(0)->shape());
+        p->drawPath(platform(1)->shape());
+        p->drawPath(shape());
+        p->drawPath(field_->ball()->shape());
     }
 }
 
@@ -90,7 +110,7 @@ double CircleOfDeath::radius() //радиус круга
     return radius_;
 }
 
-double CircleOfDeath::limiter(int i) //его итый ограничетель
+double CircleOfDeath::limiter(int i) const //его итый ограничетель
 {
     return limiter_[i];
 }
@@ -98,4 +118,15 @@ double CircleOfDeath::limiter(int i) //его итый ограничетель
 Platform * CircleOfDeath::platform(int i) //его итая вагонетка
 {
     return platform_[i];
+}
+
+//вернуть номер вагонетки по одной точке
+int CircleOfDeath::getColor(QPointF& p)
+{
+    double angle = acos(p.x()/sqrt(p.x()*p.x()+p.y()*p.y()));
+    if (p.y()<0) angle = 2*PI-angle;
+    if (angle<limiter_[1] && angle>limiter_[0])
+        return 0;
+    else
+        return 1;
 }

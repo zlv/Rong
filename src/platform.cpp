@@ -16,20 +16,19 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
+#include "platform.h"
+#include "constants.h"
 #include <QPainter>
 #include <QPixmap>
 #include <math.h>
-#include "platform.h"
-#include "constants.h"
 
-/*эталонный радиус окружности смерти; радиус круга смерти сравнивается
-с этой константой, и увеличивается или уменьшается /
-  radius of the circle of death, that affects on the platform size*/
-const double Platform::neededRadius = 250;
+const std::string Platform::filenames[2] = {"../images/platform-red.png",
+                                            "../images/platform-blu.png"};
 
+//i -- index of platform
 Platform::Platform(int i, QGraphicsItem *parent) :
     QGraphicsItem(parent), index_(i),
-    pixmapSize_(120,20), pixmap_(pixmapSize_.width(),pixmapSize_.height()),
+    pixmapSize_(120,20), pixmap_(QString::fromStdString(filenames[i])),
     circle_(static_cast<CircleOfDeath*>(parent))
 {
     //минимальный угол, на него влияет размер ограничивающей области
@@ -42,22 +41,10 @@ Platform::Platform(int i, QGraphicsItem *parent) :
     angle_ = (minAngle_+maxAngle_)/2;
     //все точки вагонетки
     polygon_ << QPointF(0,0)
-             << QPointF(pixmapSize_.height()-1,pixmapSize_.height()-1)
-             << QPointF(pixmapSize_.width()-pixmapSize_.height()-1,
+             << QPointF(pixmapSize_.height()/2-1,pixmapSize_.height()-1)
+             << QPointF(pixmapSize_.width()-pixmapSize_.height()/2-1,
                         pixmapSize_.height()-1)
              << QPointF(pixmapSize_.width()-1,0);
-    if (!bPixmap) return; //дальше рисование битмапа
-    pixmap_.fill(Qt::transparent);
-    QPainter* painter = new QPainter(&pixmap_);
-    QBrush brush(Qt::SolidLine);
-    if (i==0) //цвет в зависимости от номера вагонетки
-        brush.setColor(Qt::darkRed);
-    else
-        brush.setColor(Qt::darkBlue);
-    painter->setBrush(brush);
-    painter->setPen(Qt::NoPen);
-    painter->drawPolygon(polygon_);
-    delete painter;
 }
 
 /*================================
@@ -66,7 +53,7 @@ Platform::Platform(int i, QGraphicsItem *parent) :
 
 QRectF Platform::boundingRect() const //регион отсечения
 {
-    QPolygonF polygon = findPolygon(); //найти все точки
+    /*QPolygonF polygon = findPolygon(); //найти все точки
     double width=-1,height=-1; //ширина,высота
     double leftx=INT_MAX,lefty=INT_MAX; //крайние левая и правая точки
 
@@ -89,7 +76,8 @@ QRectF Platform::boundingRect() const //регион отсечения
         }
     }
 
-    return QRectF(leftx,lefty,width,height);
+    return QRectF(leftx,lefty,width,height);*/
+    return QRectF();
 }
 
 //форма фигуры (для сравнивания)
@@ -106,14 +94,14 @@ void Platform::paint(QPainter *p, const QStyleOptionGraphicsItem *,
                      QWidget *)
 {
     double radius = circle_->radius(); //радиус круга смерти
-    double max = radius/neededRadius; //увеличение
+    double max = radius/CircleOfDeath::neededRadius; //увеличение
 
     p->rotate(90.0+angle_/PI*180); // поворот
     if (!bPixmap) //рисование без битмапа
     {
         p->setRenderHint(QPainter::Antialiasing,true); //сглаживание
         QBrush brush(Qt::SolidLine);
-        if (index_==0)
+        if (index_==0) //цвет вагонетки
             brush.setColor(Qt::darkRed);
         else
             brush.setColor(Qt::darkBlue);
@@ -136,6 +124,19 @@ void Platform::paint(QPainter *p, const QStyleOptionGraphicsItem *,
         QRectF source(0,0,pixmapSize_.width(),pixmapSize_.height());
         p->drawPixmap(target,pixmap_,source);
     }
+}
+
+double Platform::angle() //угол в круге
+{
+    return angle_;
+}
+
+double Platform::angleTox() //угол к оси x (от 0 до pi/2)
+{
+    QPolygonF polygon = findPolygon();
+    double dx = polygon[2].x()-polygon[1].x();
+    double dy = polygon[2].y()-polygon[1].y();
+    return acos(fabs(dx)/sqrt(dx*dx+dy*dy));
 }
 
 /*=================
@@ -174,7 +175,7 @@ void Platform::changeAngle(double da)
 QPolygonF Platform::findPolygon() const
 {
     double radius = circle_->radius(); //радиус круга смерти
-    double max = radius/neededRadius; //увеличение
+    double max = radius/CircleOfDeath::neededRadius; //увеличение
     double width = pixmapSize_.width() *max/2; //пол ширины вагонетки
     double height= pixmapSize_.height()*max/2; //пол высоты вагонетки
     //проекция высот на оси

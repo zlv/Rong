@@ -4,6 +4,12 @@ Site: https://github.com/zlv/Rong
 
 Authors: zlv(Yevgeny Lezhnin) <z_lezhnin@mail2000.ru>, pavertomato(Yegor Lezhnin) <pavertomato@gmail.com>, 2011 -- Tomsk->Siberia
 
+Description:
+You see 2 platforms painted with different colors, red and blue, you can control red one. There is a ball, that moving on the screen. There are 2 circle segments: red and blue too -- be carefull with them, because if a ball, then it has color different than your platform, falls on your segment, you will lose a point!
+
+Controls:
+You can control your platform with mouse clicking or arrow keys.
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

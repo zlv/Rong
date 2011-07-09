@@ -7,7 +7,10 @@ HEADERS += \
     platform.h \
     constants.h \
     ball.h \
-    func.h
+    func.h \
+    noviceai.h \
+    bonusball.h \
+    score.h
 
 SOURCES += \
     field.cpp \
@@ -17,7 +20,10 @@ SOURCES += \
     windowfield.cpp \
     main.cpp \
     platform.cpp \
-    ball.cpp
+    ball.cpp \
+    noviceai.cpp \
+    bonusball.cpp \
+    score.cpp
 
 OTHER_FILES += \
     баги

@@ -4,7 +4,7 @@
 == включает интерфейс обработки событий, действий, мозговых импульсов    ==
 == пользователя. /                                                       ==
 ==                                                                       ==
-==   Player -- class representing interactoins with people (users).      ==
+==   Player -- class representing interactions with people (users).      ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -28,7 +28,6 @@
 
 class Player : public Gamer
 {
-    static const double dang; //изменение угла / delta angle
 public:
     Player(Field*,int);
     //переопределение функций Игрока / redefinition of Gamer's functions

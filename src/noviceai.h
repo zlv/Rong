@@ -1,4 +1,8 @@
 /*=========================================================================
+==                             noviceai.h                                ==
+==   NoviceAI -- начинающий бот. /                                       ==
+==                                                                       ==
+==   NoviceAI -- bot-beginner.                                           ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -16,47 +20,31 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#include "field.h" //этот класс
-#include "ball.h"
-#include "circleofdeath.h"
-#include "player.h"
-#include "noviceai.h"
-#include "score.h"
+#ifndef NOVICEAI_H
+#define NOVICEAI_H
+#include "gamer.h"
+#include <QMutex>
 
-Field::Field()
+class NoviceAI : public Gamer
 {
-    ball_ = new Ball(this,2,4);
-    circle_ = new CircleOfDeath(this);
-    gamer_[0] = new Player(this,0);
-    gamer_[1] = new NoviceAI(this,1);
-    //нулевой игрок слушает нажатия мыши, а также стрелки, второй игрок --
-    gamer_[0]->setMousePressListening(); //это бот, он слушает таймер
-    gamer_[1]->setMouseMovedListening();
-    gamer_[0]->setKeyrdArrowListening();
-    gamer_[1]->setTimerTickdListening();
-    score_ = new Score(this); //панель со счётом
-}
+    Q_OBJECT
 
-/*================================
-====      Открытые функции      ====
-  ================================*/
+    QMutex mutex; //мьютекс для взаимодействия мозга бота и игры
+    QPointF ballPoint_; //координаты мяча
+    volatile double angle_; //угол нашей вагонетки / angle of platform
+    volatile int direction; //1 -- право, 0 -- центр, -1 -- лево
+public:
+    //угол, который должен быть до мяча, чтобы компьютер
+    static const double novicedang; //сделал шаг
 
-CircleOfDeath* Field::circle() //круг смерти
-{
-    return circle_;
-}
+    NoviceAI(Field*,int);
+    void timerTickd(int);
+public slots:
+    //изменить переменные
+    void changeDirection(QPointF&,double);
+protected:
+    //работа мозга бота во время которой он решает
+    void run(); //куда ему двигаться дальше
+};
 
-Gamer* Field::gamer(int i) //итый игрок
-{
-    return gamer_[i];
-}
-
-Ball* Field::ball() //мячик
-{
-    return ball_;
-}
-
-Score * Field::score() //панель счёта
-{
-    return score_;
-}
+#endif // NOVICEAI_H

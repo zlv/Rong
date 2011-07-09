@@ -46,13 +46,24 @@ class Ball : public QGraphicsItem
   Field *field_;
   QPixmap pixmap_;
   bool painted_;
+  enum BallColor{RED,BLUE,WHITE} color_;
+  double vx_;
+  double vy_;
+  int time_;
 public:
-    Ball(Field*,QGraphicsItem *parent=0);
+  enum Type{GameBall,BonusBall} type;
+
+  Ball(Field*,double,double,QGraphicsItem *parent=0);
+  Ball(Field*,double,double,Type,QString&,QGraphicsItem *parent=0);
     QRectF boundingRect() const;
-    void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
-    void timerEvent(QTimerEvent *);
     QPainterPath shape() const;
+    void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
     void moveMe(); //движение мячика по таймеру / moving ball on timer
+    void mirror(double arc);
+    QPointF point();
+private:
+    void changeColor();
+    void drawBall();
 };
 
 #endif // BALL_H

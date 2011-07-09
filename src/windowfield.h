@@ -1,8 +1,12 @@
 /*=========================================================================
 ==                        windowfield.h                                  ==
-==   WindowField -- окно, является оболочкой для поля. /                 ==
+==   WindowField -- окно, является оболочкой для поля, включает события  ==
+== таймера.                                                              ==
+==   View -- виджет рисуемой области, включает в себя события мыши и кла-==
+== виатуры/                                                              ==
 ==                                                                       ==
-==   WindowField -- ui for the field                                     ==
+==   WindowField -- ui for the field.                                    ==
+==   View -- widget for mouse and keyboard events.                       ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -23,11 +27,12 @@
 #ifndef WINDOWFIELD_H
 #define WINDOWFIELD_H
 
+#include "field.h" //родитель
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QPoint>
-#include "field.h" //родитель
+
+class BonusBall;
 
 class WindowField : public QMainWindow, public Field
 {
@@ -38,6 +43,9 @@ public:
     WindowField();
     void update(); //обновить виджет-сцену / update scene widget
     void timerEvent(QTimerEvent *); //основной таймер приложения
+signals:
+    //вызывается по таймеру, изменяет данные для бота / called then
+    void goBot(QPointF&,double); //data, needed for bot is changed
 };
 
 //обработка событий взаимодействия
@@ -45,7 +53,9 @@ class View : public QGraphicsView
 {
     Q_OBJECT
 
+    //указатель на окно, в котором мы находимся
     WindowField *field_;
+    //переменная нужна, чтобы отслеживать перетаскивание мышью
     bool mousePressed_;
 public:
     View(QGraphicsScene*,WindowField*);
