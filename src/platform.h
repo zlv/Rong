@@ -1,7 +1,7 @@
 /*=========================================================================
 ==                           platform.h                                  ==
-==   Platform -- Вагонетка, объект, перемещающийся по кругу смерти[ и от-==
-== бивающий мячи]. Может иметь разные цвета[, размеры].  /               ==
+==   Platform -- Вагонетка, объект, перемещающийся по кругу смерти и от- ==
+== бивающий мячи. Может иметь разные цвета[, размеры].  /                ==
 ==                                                                       ==
 ==   Platform -- platform for playing, for pushing ball, for             ==
 ==  entertaining.                                                        ==
@@ -32,7 +32,7 @@ class Platform : public QGraphicsItem
     //номер вагонетки на круге смерти /
     int index_; //number of platform in the circle of death
     //минимальный,максимальный,текущий угол
-    double minAngle_,maxAngle_,angle_;
+    double minAngle_,maxAngle_,angle_,lastAngle_;
     QSizeF pixmapSize_; //размер изображения платформы
     QPixmap pixmap_; //изображение платформы
     QPolygonF polygon_; //точки вагонетки
@@ -50,11 +50,14 @@ public:
     void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
     double angle(); //угол в круге
     double angleTox(); //угол к оси x (от 0 до pi/2)
+    void redoAngle(); //отменить изменение угла
+    void setAngle(double); //установить угол
 public slots:
     void changeAngle(QPointF); //изменение угла (смотря на точку)
     void changeAngle(double);//изменение угла (только прибавить изменение)
 private:
     QPolygonF findPolygon() const; //найти нужный нам многоугольник
+    bool checkAngle(double); //проверить угол
 };
 
 #endif // PLATFORM_H

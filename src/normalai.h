@@ -1,8 +1,8 @@
 /*=========================================================================
 ==                             noviceai.h                                ==
-==   NoviceAI -- начинающий бот. /                                       ==
+==   NoviceAI -- нетупой ботище. /                                       ==
 ==                                                                       ==
-==   NoviceAI -- bot-beginner.                                           ==
+==   NoviceAI -- bot-notsilly.                                           ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -20,12 +20,12 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#ifndef NOVICEAI_H
-#define NOVICEAI_H
+#ifndef NORMALAI_H
+#define NORMALAI_H
 #include "gamer.h"
 #include <QMutex>
 
-class NoviceAI : public Gamer
+class NormalAI : public Gamer
 {
     Q_OBJECT
 
@@ -34,12 +34,17 @@ class NoviceAI : public Gamer
     QPointF ballPoint_; //координаты мяча
     volatile double angle_; //угол нашей вагонетки / angle of platform
     volatile double limiter_; //её минимальный угол
-    volatile int direction_; //1 -- право, 0 -- центр, -1 -- лево
+    volatile double vx_; //скорость раз / speed
+    volatile double vy_; //скорость два
+    volatile double circleRadius_; //размер круга смерти / our death circle
+    volatile int direction_; //1 -- право/right, 0 -- центр, -1 -- лево/left
+    bool angleSpec_; //указан ли случайный угол вагонетки
+    double tempAngle_; //вычисляемый угол
 public:
     //угол, который должен быть до мяча, чтобы компьютер
-    static const double novicedang; //сделал шаг
+    static const double normaldang; //сделал шаг
 
-    NoviceAI(Field*,int);
+    NormalAI(Field*,int);
     //перемещать платформу по событию таймера / move element on timer event
     void timerTickd();
 public slots:
@@ -49,4 +54,4 @@ protected:
     void run(); //куда ему двигаться дальше
 };
 
-#endif // NOVICEAI_H
+#endif // NORMALAI_H

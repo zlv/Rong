@@ -1,10 +1,4 @@
 /*=========================================================================
-==                           constants.h                                 ==
-==   Некоторые общедоступные константы необходимые всем обитателям игры. ==
-==                                                                       ==
-==   А также функции, которых нет в математической библиотеке /          ==
-==                                                                       ==
-==   There is a PI, and math functions.                                  ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -22,16 +16,11 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-#include "math.h"
-
-const double PI = 3.14159265359;
+#include "constants.h"
 
 //сравнение двух вещественных
-bool equal(double a, double b);
-
-//точность сравнения
-const double EPS = 1e-9;
-
-#endif // CONSTANTS_H
+bool equal(double a, double b)
+{
+    if (fabs(a-b)<EPS) return 1;
+    return 0;
+}

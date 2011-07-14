@@ -1,10 +1,8 @@
 /*=========================================================================
-==                           constants.h                                 ==
-==   Некоторые общедоступные константы необходимые всем обитателям игры. ==
+==                       settingsdialog.h                                ==
+==   SettingsDialog -- диалог для изменения параметров. /                ==
 ==                                                                       ==
-==   А также функции, которых нет в математической библиотеке /          ==
-==                                                                       ==
-==   There is a PI, and math functions.                                  ==
+==   SettingsDialog -- dialog for changing options.                      ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -22,16 +20,37 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-#include "math.h"
+#ifndef FORM_H
+#define FORM_H
 
-const double PI = 3.14159265359;
+#include "field.h"
+#include "gamer.h"
+#include <QDialog>
 
-//сравнение двух вещественных
-bool equal(double a, double b);
+namespace Ui {
+    class SettingsDialog;
+}
 
-//точность сравнения
-const double EPS = 1e-9;
+class SettingsDialog : public QDialog
+{
+    Q_OBJECT
 
-#endif // CONSTANTS_H
+    Field *field_; //указатель на поле
+    double velocity_; //установленная скорость мяча
+    Gamer::Type type_[2]; //установленные типы игроков / types of gamers
+    Gamer::Controls controls_[2]; //типы управления / control types
+    Ui::SettingsDialog *ui; //виджеты в диалоге
+
+public:
+    explicit SettingsDialog(Field*,QWidget *parent = 0);
+    ~SettingsDialog();
+private slots:
+    void okgood(); //Готово
+    void apconf(); //Применить / apply configuration
+    //изменён индекс выбора игрока / player index changed
+    void indexFor01Changed(int);
+    //изменён индекс выбора игрока / player index changed
+    void indexFor02Changed(int);
+};
+
+#endif // FORM_H

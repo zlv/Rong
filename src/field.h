@@ -5,7 +5,7 @@
 ==   Структура содержащая разные объекты, которые могут взаимодействовать==
 == друг с другом через это поле. /                                       ==
 ==                                                                       ==
-==   Field -- field, that should contain all gaming objects              ==
+==   Field -- field, that should contain all gaming objects.             ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -29,7 +29,7 @@
 
 class Ball; //мячик, объявлен в другом месте / declaration is not here
 class CircleOfDeath; //круг смерти тоже
-class Gamer; //и он тоже
+class Gamer; //и они тоже
 class Bonus;
 class BonusBall;
 class Score;
@@ -39,14 +39,16 @@ protected:
     Ball *ball_; //мячик
     CircleOfDeath *circle_; //круг
     Gamer *gamer_[2]; //игроки
-    Bonus **bonuses_;
-    std::vector<BonusBall*> bonusBalls_;
-    Score *score_;
+    Bonus **bonuses_; //бонусы
+    BonusBall *bonusBall_; //мячик, несущий бонус
+    Score *score_; //табличка со счётом
 public:
     //выводить ненужную информацию, а также вспомогательные линии
     static const bool debug=0;
 
     Field();
+    //пересоздать игрока
+    virtual void recreateGamer(int,int);
     //функции доступа
     Ball* ball();
     CircleOfDeath* circle();

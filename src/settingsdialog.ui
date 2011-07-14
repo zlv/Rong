@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsDialog</class>
+ <widget class="QWidget" name="SettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>433</width>
+    <height>256</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Game Settings</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>414</width>
+     <height>234</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="startVelocityLabel">
+        <property name="text">
+         <string>Start Velocity</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="startVelLineEdit"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="player01Label">
+        <property name="text">
+         <string>Player 1 (red)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="player01ComboBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Computer Easy</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Computer Normal</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Human</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="player01ControlsLabel">
+        <property name="text">
+         <string>Player 1 Controls</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="player01ControlsComboBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Mouse press</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mouse move</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Numbers and Arrows</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Numbers and Arrows special</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Letters only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Letters only special</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="player02Label">
+        <property name="text">
+         <string>Player 2 (blue)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="player02ComboBox">
+        <item>
+         <property name="text">
+          <string>Computer Easy</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Computer Normal</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Human</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QLabel" name="player02ControlsLabel">
+        <property name="text">
+         <string>Player 2 Controls</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="player02ControlsComboBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Mouse press</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mouse move</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Numbers and Arrows</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Numbers and Arrows special</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Letters only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Keyboard Letters only special</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="okgoodButton">
+        <property name="text">
+         <string>&amp;OK</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cancelButton">
+        <property name="text">
+         <string>&amp;Cancel</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="apconfButton">
+        <property name="text">
+         <string>&amp;Apply</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>startVelLineEdit</tabstop>
+  <tabstop>player01ComboBox</tabstop>
+  <tabstop>player01ControlsComboBox</tabstop>
+  <tabstop>player02ComboBox</tabstop>
+  <tabstop>player02ControlsComboBox</tabstop>
+  <tabstop>okgoodButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>apconfButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

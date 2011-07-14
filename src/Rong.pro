@@ -7,10 +7,11 @@ HEADERS += \
     platform.h \
     constants.h \
     ball.h \
-    func.h \
     noviceai.h \
     bonusball.h \
-    score.h
+    score.h \
+    normalai.h \
+    settingsdialog.h
 
 SOURCES += \
     field.cpp \
@@ -23,7 +24,13 @@ SOURCES += \
     ball.cpp \
     noviceai.cpp \
     bonusball.cpp \
-    score.cpp
+    score.cpp \
+    normalai.cpp \
+    settingsdialog.cpp \
+    constants.cpp
 
 OTHER_FILES += \
     баги
+
+FORMS += \
+    settingsdialog.ui

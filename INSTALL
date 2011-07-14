@@ -1,0 +1,3 @@
+cd src
+qmake CONFIG+="release" && make
+and copy executable (Rong or Rong.exe) to directory, that contains images directory.

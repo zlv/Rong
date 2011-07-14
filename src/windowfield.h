@@ -28,24 +28,41 @@
 #define WINDOWFIELD_H
 
 #include "field.h" //родитель
+#include "settingsdialog.h" //параметры
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QAction>
 
-class BonusBall;
+class FieldData;
+class View;
 
 class WindowField : public QMainWindow, public Field
 {
     Q_OBJECT
 
     QGraphicsScene scene_; //сцена для объектов Qt
+    SettingsDialog *settingsDialog_; //параметры
+    View *view_; //виджет с элементами
+    bool pause_; //нажата ли кнопка паузы?
+    QAction *newGameAction_; //новая игра
+    QAction *settingsAction_; //параметры
+    QAction *pauseAction_; //пауза
+    QAction *quitAction_; //выход
+
 public:
     WindowField();
+    void recreateGamer(int,int); //создать игрока заново
     void update(); //обновить виджет-сцену / update scene widget
     void timerEvent(QTimerEvent *); //основной таймер приложения
+private slots:
+    void showSettings(); //показать диалог настройки
+    void pause(); //установить паузу
+private:
+    void createMenu(); //создать разные меньюшки
 signals:
     //вызывается по таймеру, изменяет данные для бота / called then
-    void goBot(QPointF&,double); //data, needed for bot is changed
+    void goBot(FieldData&); //data, needed for bot is changed
 };
 
 //обработка событий взаимодействия
@@ -57,6 +74,7 @@ class View : public QGraphicsView
     WindowField *field_;
     //переменная нужна, чтобы отслеживать перетаскивание мышью
     bool mousePressed_;
+
 public:
     View(QGraphicsScene*,WindowField*);
     void mousePressEvent(QMouseEvent*);

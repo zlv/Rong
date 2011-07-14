@@ -25,19 +25,26 @@
 #include "circleofdeath.h"
 #include "platform.h"
 #include "score.h"
-Ball::Ball(Field *f, double vx, double vy, QGraphicsItem *parent)  :
+Ball::Ball(Field *f, double v, QGraphicsItem *parent)  :
     QGraphicsItem
-    (parent), radius_(30), point_(0,0),
+    (parent), radius_(10), point_(0,0),
     field_(f), pixmap_(62,62), painted_(0),
-    color_(BLUE), vx_(vx),vy_(vy), type(GameBall)
+    color_(WHITE), type(GameBall)
 {
+    double angle = PI*qrand()*2/RAND_MAX;
+    setVelocity(v,angle);
     drawBall();
 }
 
-Ball::Ball(Field *f, double vx, double vy, Type t, QString& sImg, QGraphicsItem *parent)
-    : QGraphicsItem(parent), radius_(32), point_(0,0),
+Ball::Ball(Field *f, double v, Type t, QString& sImg, QGraphicsItem *parent)
+    : QGraphicsItem(parent), radius_(10), point_(0,0),
     field_(f), pixmap_(sImg), painted_(0),
-    color_(BLUE), vx_(vx), vy_(vy), type(t){}
+    color_(WHITE), type(t)
+{
+    if(t==BonusBall)radius_*=3;
+    double angle = PI*qrand()*2/RAND_MAX;
+    setVelocity(v,angle);
+}
 
 /*================================
 ===    Унаследованные функции    ===
@@ -46,8 +53,8 @@ Ball::Ball(Field *f, double vx, double vy, Type t, QString& sImg, QGraphicsItem 
 QRectF Ball::boundingRect() const //регион отсечения
 {
     double radius = field_->circle()->radius(); //радиус круга смерти
-    double max = radius/CircleOfDeath::neededRadius/4; //увеличение
-    return QRectF(point_.x()-radius_, point_.y()-radius_,
+    double max = radius/CircleOfDeath::neededRadius; //увеличение
+    return QRectF(point_.x()-radius_*max, point_.y()-radius_*max,
                    radius_*2*max,radius_*2*max);
 }
 
@@ -56,8 +63,8 @@ QPainterPath Ball::shape() const
 {
     QPainterPath path;
     double radius = field_->circle()->radius(); //радиус круга смерти
-    double max = radius/CircleOfDeath::neededRadius/4; //увеличение
-    path.addEllipse(point_.x()-radius_, point_.y()-radius_,
+    double max = radius/CircleOfDeath::neededRadius; //увеличение
+    path.addEllipse(point_.x()-radius_*max, point_.y()-radius_*max,
                     radius_*2*max,radius_*2*max);
     return path;
 }
@@ -66,8 +73,8 @@ QPainterPath Ball::shape() const
 void Ball::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget*)
 {
     double radius = field_->circle()->radius(); //радиус круга смерти
-    double max = radius/CircleOfDeath::neededRadius/4; //увеличение
-    QRectF target(point_.x()-radius_,point_.y()-radius_,
+    double max = radius/CircleOfDeath::neededRadius; //увеличение
+    QRectF target(point_.x()-radius_*max,point_.y()-radius_*max,
                   radius_*2*max,radius_*2*max);
     QRectF source(0,0,radius_*2,radius_*2);
     p->drawPixmap(target,pixmap_,source);
@@ -82,21 +89,16 @@ void Ball::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget*)
 void Ball::moveMe()
 {
     if (!painted_) return;
-
-    //проекции оси движения на оси X и Y
-    //если перестаёт пересекаться с кругом смерти
-    bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);
-    bool crossPlatform[2];
-    for (int i=0; i<2; i++)
+    bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);//если перестаёт пересекаться с кругом смерти
+    bool crossPlatform[2];//если пересекается с одной из вагонеток
+    for (int i=0; i<2; i++)//2 вагонетки
     {
-        crossPlatform[i] = collidesWithItem(field_->circle()->platform(i));
+        crossPlatform[i] = collidesWithItem(field_->circle()->platform(i));//пересекается ли с iтой вагонеткой
     }
-    if (crossBorder || crossPlatform[0] || crossPlatform[1])
+    if (crossBorder || crossPlatform[0] || crossPlatform[1])//если коснулся вагонеток, или перестал касаться круга смерти
     {
-        //модуль вектора движения(равен модулю векторов отражения и падения)
-        //угол касательной к окружности в точке соприкосновения
-        double arc;
-        if(crossPlatform[0] || crossPlatform[1])
+        double arc;//угол прямой к оси X от которой отражается шарик
+        if(crossPlatform[0] || crossPlatform[1])//если коснулся какой-либо вагонетки
         {
             if(crossPlatform[0])
             {
@@ -131,10 +133,11 @@ void Ball::moveMe()
         }
         else
         {
+            //угол касательной к окружности, в точке, где шарик перестаёт пересекаться с кругом смерти
             arc=acos(point_.y()/(sqrt(point_.x()*point_.x()+point_.y()*point_.y())));
             BallColor circleColor = static_cast<BallColor>(field_->circle()->getColor(point_));
             //смена цвета мяча, а также реагирование на попадание не
-            if (circleColor!=color_) //в свою часть круга смерти
+            if (circleColor!=color_ && circleColor!=WHITE) //в свою часть круга смерти
             {
                 if (color_==WHITE)
                 {
@@ -149,24 +152,27 @@ void Ball::moveMe()
                 }
             }
         }
-        //который не больше 90
+        //угол к оси X прямой, от которой отражается шарик не больше 90
         arc=(arc>PI/2?PI-arc:arc);
-        qDebug()<<arc*180/PI;
-        //правая-нижняя часть круга смерти
+
+        if(Field::debug)qDebug()<<arc*180/PI;
+        //изменение вектора движения шарика
         mirror(arc);
     }
-    //изменение координат летающего круга в соответствии с вектором движения
+    //изменение координат шарика в соответствии с вектором движения
     point_=QPointF(point_.x()+vx_,point_.y()+vy_);
 }
 
-
+//сказать в какой шарик точке
 QPointF Ball::point()
 {
     return point_;
 }
 
+//изменение вектора движения шарика
 void Ball::mirror(double arc)
 {
+    //моуль вектора движения
     double length = sqrt(vx_*vx_+vy_*vy_);
     //угол падающего вектора к оси X
     double angle;
@@ -184,10 +190,10 @@ void Ball::mirror(double arc)
                 //проекция отраженного вектора на ось Y
                 vy_ =-length*sin(angle);
             }
-            else
+            else//если движется вверх
             {
+                //угол вектора отражения к оси X
                 angle=-PI/2+(PI-acos(vy_/length))+2*arc;
-                qDebug()<<angle*180/PI<<' '<<(PI-acos(vy_/length))*180/PI<<' '<<arc*180/PI;
                 //проекция отраженного вектора на ось X
                 vx_ = length*cos(angle);
                 //проекция отраженного вектора на ось Y
@@ -202,7 +208,7 @@ void Ball::mirror(double arc)
             if(vy_>0)
             {
             //угол вектора отражения к оси X
-            angle=-(PI-acos(vx_/length))+2*arc;
+            angle=(PI-acos(vx_/length))-2*arc;
             //проекция отраженного вектора на ось X
             vx_ =-length*cos(angle);
             //проекция отраженного вектора на ось Y
@@ -210,12 +216,12 @@ void Ball::mirror(double arc)
             }
             else
             {
-                //угол вектора отражения к оси X
+             /*   //угол вектора отражения к оси X
                 angle=acos(vx_/length)+2*arc;
                 //проекция отраженного вектора на ось X
                 vx_ =-length*cos(angle);
                 //проекция отраженного вектора на ось Y
-                vy_ =-length*sin(angle);
+                vy_ =-length*sin(angle);*/
             }
 
         }
@@ -318,19 +324,30 @@ void Ball::mirror(double arc)
                     {
                         if(vy_<0)
                         {
-                            angle=2*arc-acos(-vx_/length);
+                            angle=PI+acos(vx_/length)-2*arc;
                             vx_ =-length*cos(angle);
-                            vy_ =-length*sin(angle);
+                            vy_ =length*sin(angle);
                         }
                         else
                         {
-                            angle=PI-acos(-vx_/length)-2*arc;
-                            vx_ =length*cos(angle);
+                            angle=(PI-acos(vx_/length))+2*arc;
+                            vx_ =-length*cos(angle);
                             vy_ =-length*sin(angle);
+
                         }
 
                     }
                 }
+}
+
+double Ball::vx()
+{
+    return vx_;
+}
+
+double Ball::vy()
+{
+    return vy_;
 }
 
 //изменить цвет мяча
@@ -341,6 +358,24 @@ void Ball::changeColor()
     else if (color_== RED)
         color_ =BLUE;
     drawBall();
+}
+
+double Ball::velocity()
+{
+    return sqrt(vx_*vx_+vy_*vy_);
+}
+
+void Ball::setVelocity(double v)
+{
+    double angle = atan(vy_/vx_);
+    if (vx_<0) angle+=PI;
+    setVelocity(v,angle);
+}
+
+void Ball::setVelocity(double v, double a)
+{
+    vx_ = cos(a)*v;
+    vy_ = sin(a)*v;
 }
 
 //нарисовать мячик с новым цветом
@@ -356,7 +391,7 @@ void Ball::drawBall()
     else if (color_==BLUE)
         br.setColor(Qt::blue);
     else
-        br.setColor(Qt::gray);
+        br.setColor(Qt::darkGray);
     br.setStyle(Qt::SolidPattern);
     p->setPen(pen);
     p->setBrush(br);
@@ -364,4 +399,9 @@ void Ball::drawBall()
     p->drawEllipse(QPointF(radius_,radius_),static_cast<int>(radius_),
                           static_cast<int>(radius_));
     delete p;
+}
+
+double Ball::color()
+{
+    return color_;
 }

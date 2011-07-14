@@ -22,6 +22,7 @@
 #include <QPixmap>
 #include <math.h>
 
+//имена файлов с изображениями вагонеток
 const std::string Platform::filenames[2] = {"../images/platform-red.png",
                                             "../images/platform-blu.png"};
 
@@ -53,7 +54,7 @@ Platform::Platform(int i, QGraphicsItem *parent) :
 
 QRectF Platform::boundingRect() const //регион отсечения
 {
-    /*QPolygonF polygon = findPolygon(); //найти все точки
+    QPolygonF polygon = findPolygon(); //найти все точки
     double width=-1,height=-1; //ширина,высота
     double leftx=INT_MAX,lefty=INT_MAX; //крайние левая и правая точки
 
@@ -76,8 +77,7 @@ QRectF Platform::boundingRect() const //регион отсечения
         }
     }
 
-    return QRectF(leftx,lefty,width,height);*/
-    return QRectF();
+    return QRectF(leftx,lefty,width,height);
 }
 
 //форма фигуры (для сравнивания)
@@ -139,6 +139,18 @@ double Platform::angleTox() //угол к оси x (от 0 до pi/2)
     return acos(fabs(dx)/sqrt(dx*dx+dy*dy));
 }
 
+void Platform::redoAngle() //отменить изменение угла
+{
+    angle_ = lastAngle_;
+}
+
+void Platform::setAngle(double a) //установить угол
+{
+    lastAngle_ = angle_;
+    angle_ = a;
+    emit update();
+}
+
 /*=================
 ===     Слоты     ===
   =================*/
@@ -147,12 +159,14 @@ double Platform::angleTox() //угол к оси x (от 0 до pi/2)
 void Platform::changeAngle(QPointF p)
 {
     double tempAngle; //вычислить угол
-    tempAngle = acos(p.x()/sqrt(p.y()*p.y()+p.x()*p.x()));
+    tempAngle = atan(p.x()/p.y())+PI/2;
+    if (p.y()>0) tempAngle = PI-tempAngle;
     tempAngle = index_?circle_->limiter(index_)+PI-tempAngle:
                 circle_->limiter(index_)+tempAngle;
     //проверка на границы
-    if (tempAngle<=maxAngle_ && tempAngle>=minAngle_)
+    if (checkAngle(tempAngle))
     {
+        lastAngle_ = angle_;
         angle_ = tempAngle;
         emit update();
     }
@@ -164,8 +178,9 @@ void Platform::changeAngle(double da)
     double tempAngle;
     tempAngle = angle_+da;
     //проверка на границы
-    if (tempAngle<=maxAngle_ && tempAngle>=minAngle_)
+    if (checkAngle(tempAngle))
     {
+        lastAngle_ = angle_;
         angle_ = tempAngle;
         emit update();
     }
@@ -201,4 +216,9 @@ QPolygonF Platform::findPolygon() const
     }
 
     return polygon;
+}
+
+bool Platform::checkAngle(double a) //проверить угол
+{
+    return a<=maxAngle_ && a>=minAngle_;
 }

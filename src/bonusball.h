@@ -28,7 +28,8 @@
 class BonusBall : public Ball
 {
 public:
-    BonusBall(Field*,double,double,Type,QString&,QGraphicsItem *parent=0);
+    BonusBall(Field*,double,Type,QString&,QGraphicsItem *parent=0);
+    void moveMe();
 };
 
 #endif // BONUSBALL_H

@@ -28,8 +28,8 @@
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #ifndef CIRCLEOFDEATH_H
 #define CIRCLEOFDEATH_H
-#include <QGraphicsItem> //базовый класс, графический элемент qt
 #include "field.h" //поле, на котором размещён круг
+#include <QGraphicsItem> //базовый класс, графический элемент qt
 
 class Platform; //только объявление
 class CircleOfDeath : public QGraphicsItem
@@ -38,10 +38,13 @@ class CircleOfDeath : public QGraphicsItem
     double limiter_[2]; //углы ограничителей / limiters for circle of death
     double radius_; //радиус круга смерти / for the circle of death
     Field *field_; //связующее поле
+    int alpha_[4];//углы
+    //буквы, обозначающие клавишу, на которую нужно нажимать
+    static const QString letters[9];
 public:
     static const double limitEmptySpace; //ширина ограничителей
     /*эталонный радиус окружности смерти; радиус круга смерти сравнивается
-    с этой константой, и увеличивается или уменьшается /
+    с этой константой, и платформа увеличивается или уменьшается /
       radius of the circle of death, that affects on the platform size*/
     static const double neededRadius;
 
@@ -50,12 +53,12 @@ public:
     QRectF boundingRect() const;
     QPainterPath shape() const;
     void paint(QPainter*,const QStyleOptionGraphicsItem *, QWidget*);
+    //вернуть номер вагонетки по одной точке
+    int getColor(QPointF&);
     //функции доступа
     double radius();
     double limiter(int) const;
     Platform* platform(int);
-    //вернуть номер вагонетки по одной точке
-    int getColor(QPointF&);
 };
 
 #endif // CIRCLEOFDEATH_H

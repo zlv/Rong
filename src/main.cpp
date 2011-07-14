@@ -16,14 +16,25 @@
 =========================================================================*/
 /*Авторы/Authors: pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь
                        zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь*/
-#include <QApplication>
 #include "windowfield.h"
+#include <QApplication>
+#include <QTranslator>
+#include <QLocale>
 
 int main(int argc, char **argv)
 {
     QApplication app(argc,argv);
 
+    //загрузка языка / load language
+    QTranslator translator;
+    if (QLocale::system().name().indexOf("ru")!=-1)
+    {
+        translator.load("ru");
+    }
+    app.installTranslator(&translator);
+
     WindowField window;
+    //размеры окна
     window.setBaseSize(800,600);
     window.setGeometry(50,50,800,600);
     window.show();

@@ -28,12 +28,28 @@
 
 class Player : public Gamer
 {
+    static const int dcoord = 10;
+    static const int cursorTimeStd = 200;
+    QPointF cursor_;
+    bool showCursor_;
+    int cursorTime_;
+    int cursorPlayer_;
 public:
     Player(Field*,int);
     //переопределение функций Игрока / redefinition of Gamer's functions
     void mouseMoved(QPointF&); //движение мыши
     void mousePress(QPointF&); //нажатие на кнопку мыши
     void keyPressed(int); //нажатие на стрелку
+    void decCursorTime(); //срабатывает по событию таймера
+    void setCursor(QPointF&); //установить курсор на точку
+    QPointF getCursor(); //доступ к курсору
+    bool isShowCursor(); //показывается ли курсор
+    void showCursor(); //показать курсор
+    void showCursorPermanent(); //показать курсор без ограничения показа
+    void hideCursor(); //скрыть
+    bool isCrossShape(); //надо ли показывать перекрестие
+    bool isNumbsShape(); //надо ли показывать посказку с цифрами
+    bool isLetrsShape(); //надо ли показывать посказку с буквами
 };
 
 #endif // PLAYER_H

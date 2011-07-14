@@ -20,14 +20,20 @@
 #include "constants.h" //Пи
 #include "platform.h" //вагонетки
 #include "ball.h" //мяч нужен для определения контуров
+#include "player.h" //из него мы узнаем о том, нужно ли показывать подсказки для игрока
 #include <QPainter> //рисование
 #include <QWidget>  //размеры окна
 #include <math.h>
 
+const QString CircleOfDeath::letters[9] =
+    {QObject::tr("V"),QObject::tr("B"),QObject::tr("N"),
+     QObject::tr("G"),QObject::tr("H"),QObject::tr("J"),
+     QObject::tr("Y"),QObject::tr("U"),QObject::tr("I")};
+
 const double CircleOfDeath::limitEmptySpace = PI/36; //ширина ограничителей
 
 /*эталонный радиус окружности смерти; радиус круга смерти сравнивается
-с этой константой, и увеличивается или уменьшается /
+с этой константой, и платформа увеличивается или уменьшается /
   radius of the circle of death, that affects on the platform size*/
 const double CircleOfDeath::neededRadius = 250;
 
@@ -38,6 +44,10 @@ CircleOfDeath::CircleOfDeath(Field *f, QGraphicsItem *parent) :
         limiter_[i] = PI*i; //ограничетели через каждую Пи
     for (int i=0; i<2; i++) //создание двух вагонеток
         platform_[i] = new Platform(i,this);
+    alpha_[0] = (limiter_[0]+limitEmptySpace)/2/PI*5760;//градусная мера
+    alpha_[1] = (limiter_[1]-limitEmptySpace)/2/PI*5760;//1/16 градуса; пол-
+    alpha_[2] = (limiter_[1]+limitEmptySpace)/2/PI*5760;//ный угол оборота
+    alpha_[3] = (1+(limiter_[0]-limitEmptySpace)/2/PI)*5760;//равен 360*16=5760
 }
 
 /*================================
@@ -67,11 +77,7 @@ void CircleOfDeath::paint(QPainter *p, const QStyleOptionGraphicsItem *,
     radius_ = size.width()<size.height()? //минимальный габарит
               size.width():size.height();
     radius_=radius_/2.2; //радиус равен половине окна + круг смерти должен
-    int alpha[4];//углы //быть меньше, чем окно
-    alpha[0] = (limiter_[0]+limitEmptySpace)/2/PI*5760;//градусная мера
-    alpha[1] = (limiter_[1]-limitEmptySpace)/2/PI*5760;//1/16 градуса; пол-
-    alpha[2] = (limiter_[1]+limitEmptySpace)/2/PI*5760;//ный угол оборота
-    alpha[3] = (limiter_[0]-limitEmptySpace)/2/PI*5760;//равен 360*16=5760
+                     //быть меньше, чем окно
     QColor colors[] = {Qt::blue, Qt::red}; //цвета полуокружностей
 
     p->setRenderHint(QPainter::Antialiasing,true); //включить сглаживание
@@ -82,11 +88,64 @@ void CircleOfDeath::paint(QPainter *p, const QStyleOptionGraphicsItem *,
     {
         pen.setColor(colors[i]);
         p->setPen(pen);
-        p->drawArc(-radius_,-radius_,radius_*2,radius_*2,alpha[i*2],
-                   (alpha[i*2+1]<0?(5760+alpha[i*2+1]):alpha[i*2+1])-
-                   alpha[i*2]);
+        p->drawArc(-radius_,-radius_,radius_*2,radius_*2,alpha_[i*2],
+                   alpha_[i*2+1]-alpha_[i*2]);
     }
-    if  (Field::debug)
+
+    //рисование подсказок
+    for (int playerNum=0; playerNum<2; playerNum++)
+    {
+        //нужно рисовать, только если это игрок
+        if (field_->gamer(playerNum)->type()!=Gamer::Human)
+            continue;
+        Player *player = static_cast<Player*>(field_->gamer(playerNum));
+        if (player->isShowCursor()) //если курсор нужно показывать
+        {
+            if (player->isCrossShape()) //показать перекрестье
+            {
+                //выбрать цвет, такой же, как у игрока
+                if (playerNum==0)
+                    p->setPen(Qt::red);
+                else
+                    p->setPen(Qt::blue);
+                const double cursorSize = 8;
+                p->drawLine(player->getCursor()-QPoint(cursorSize/2,0),
+                            player->getCursor()+QPoint(cursorSize/2,0));
+                p->drawLine(player->getCursor()-QPoint(0,cursorSize/2),
+                            player->getCursor()+QPoint(0,cursorSize/2));
+            }
+            //рисовать подсказки с названиями клавиш возле круга
+            p->setPen(Qt::gray);
+            //цифры
+            if (player->isNumbsShape())
+            {
+                for (int i=0; i<9; i++)
+                {
+                    QPoint coord;
+                    //угол от 0 до 180
+                    double angle = PI+(playerNum?+1:-1)*(i*2+1)*PI/18;
+                    //разместить возле круга
+                    coord.setX(1.05*radius_*cos(angle));
+                    coord.setY(1.05*radius_*sin(angle)+p->font().pointSize()/2);
+                    p->drawText(coord,QString::number(i+1));
+                }
+            }
+            //буквы
+            if (player->isLetrsShape())
+            {
+                for (int i=0; i<9; i++)
+                {
+                    QPoint coord;
+                    double angle = PI+(playerNum?+1:-1)*(i*2+1)*PI/18;
+                    coord.setX(1.05*radius_*cos(angle));
+                    coord.setY(1.05*radius_*sin(angle)+p->font().pointSize()/2);
+                    p->drawText(coord,letters[i]);
+                }
+            }
+        }
+    }
+    //нарисовать ненужные игроку картинки
+    if (Field::debug)
     {
         pen.setWidth(1);
         p->setPen(pen);
@@ -105,6 +164,21 @@ void CircleOfDeath::paint(QPainter *p, const QStyleOptionGraphicsItem *,
 ====      Открытые функции      ====
   ================================*/
 
+//вернуть номер вагонетки по одной точке
+int CircleOfDeath::getColor(QPointF& p)
+{
+    double angle = atan(p.x()/p.y())+PI/2;
+    if (p.y()>0) angle = PI-angle;
+    if (p.y()<0) angle = 2*PI-angle;
+    if (angle<limiter_[1]-limitEmptySpace
+     && angle>limiter_[0]+limitEmptySpace)
+        return 0;
+    else if (angle<limiter_[0]-limitEmptySpace+2*PI
+          && angle>limiter_[1]+limitEmptySpace)
+        return 1;
+    return 2;
+}
+
 double CircleOfDeath::radius() //радиус круга
 {
     return radius_;
@@ -118,15 +192,4 @@ double CircleOfDeath::limiter(int i) const //его итый ограничет�
 Platform * CircleOfDeath::platform(int i) //его итая вагонетка
 {
     return platform_[i];
-}
-
-//вернуть номер вагонетки по одной точке
-int CircleOfDeath::getColor(QPointF& p)
-{
-    double angle = acos(p.x()/sqrt(p.x()*p.x()+p.y()*p.y()));
-    if (p.y()<0) angle = 2*PI-angle;
-    if (angle<limiter_[1] && angle>limiter_[0])
-        return 0;
-    else
-        return 1;
 }

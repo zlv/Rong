@@ -41,27 +41,34 @@
 
 class Ball : public QGraphicsItem
 {
+protected:
   double radius_; //радиус мячика
   QPointF point_;
   Field *field_;
   QPixmap pixmap_;
   bool painted_;
   enum BallColor{RED,BLUE,WHITE} color_;
-  double vx_;
-  double vy_;
+  double vx_; //проекция вектора движения на ось X
+  double vy_; //проекция вектора движения на ось Y
   int time_;
 public:
   enum Type{GameBall,BonusBall} type;
 
-  Ball(Field*,double,double,QGraphicsItem *parent=0);
-  Ball(Field*,double,double,Type,QString&,QGraphicsItem *parent=0);
+  Ball(Field*,double,QGraphicsItem *parent=0);
+  Ball(Field*,double,Type,QString&,QGraphicsItem *parent=0);
     QRectF boundingRect() const;
     QPainterPath shape() const;
     void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
     void moveMe(); //движение мячика по таймеру / moving ball on timer
     void mirror(double arc);
     QPointF point();
-private:
+    double vx();
+    double vy();
+    double velocity();
+    double color();
+    void setVelocity(double);
+    void setVelocity(double,double);
+protected:
     void changeColor();
     void drawBall();
 };
