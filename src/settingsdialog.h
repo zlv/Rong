@@ -23,13 +23,14 @@
 #ifndef FORM_H
 #define FORM_H
 
-#include "field.h"
-#include "gamer.h"
 #include <QDialog>
+#include "gamer.h"
 
 namespace Ui {
     class SettingsDialog;
 }
+
+class Field;
 
 class SettingsDialog : public QDialog
 {
@@ -37,6 +38,7 @@ class SettingsDialog : public QDialog
 
     Field *field_; //указатель на поле
     double velocity_; //установленная скорость мяча
+    int maxPoints_; //максимум очков
     Gamer::Type type_[2]; //установленные типы игроков / types of gamers
     Gamer::Controls controls_[2]; //типы управления / control types
     Ui::SettingsDialog *ui; //виджеты в диалоге

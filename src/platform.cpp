@@ -18,20 +18,24 @@
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #include "platform.h"
 #include "constants.h"
+#include "circleofdeath.h"
 #include <QPainter>
 #include <QPixmap>
 #include <math.h>
+#include <limits.h>
 
-//имена файлов с изображениями вагонеток
-const std::string Platform::filenames[2] = {"../images/platform-red.png",
-                                            "../images/platform-blu.png"};
+//имена файлов с изображениями вагонеток / platform images
+const std::string Platform::filenames[2] = {":/images/platform-red.png",
+                                            ":/images/platform-blu.png"};
 
 //i -- index of platform
 Platform::Platform(int i, QGraphicsItem *parent) :
     QGraphicsItem(parent), index_(i),
     pixmapSize_(120,20), pixmap_(QString::fromStdString(filenames[i])),
-    circle_(static_cast<CircleOfDeath*>(parent))
+    circle_(static_cast<CircleOfDeath*>(parent)),
+    bonusMax_(1.0)
 {
+    bPixmap_ = !pixmap_.isNull();
     //минимальный угол, на него влияет размер ограничивающей области
     minAngle_ = circle_->limiter(i)+CircleOfDeath::limitEmptySpace;
     //максимальный, то же самое
@@ -71,9 +75,9 @@ QRectF Platform::boundingRect() const //регион отсечения
             double twidth = fabs(polygon[j].x()-polygon[i].x());
             double theight= fabs(polygon[j].y()-polygon[i].y());
             if (width<twidth)
-                width = twidth;
+                width=twidth;
             if (height<theight)
-                height = theight;
+                height=theight;
         }
     }
 
@@ -90,14 +94,15 @@ QPainterPath Platform::shape() const
     return path;
 }
 
+//рисование само сабой
 void Platform::paint(QPainter *p, const QStyleOptionGraphicsItem *,
                      QWidget *)
 {
     double radius = circle_->radius(); //радиус круга смерти
-    double max = radius/CircleOfDeath::neededRadius; //увеличение
+    double max = radius/CircleOfDeath::neededRadius*bonusMax_; //увеличение
 
     p->rotate(90.0+angle_/PI*180); // поворот
-    if (!bPixmap) //рисование без битмапа
+    if (!bPixmap_) //рисование без битмапа
     {
         p->setRenderHint(QPainter::Antialiasing,true); //сглаживание
         QBrush brush(Qt::SolidLine);
@@ -118,6 +123,7 @@ void Platform::paint(QPainter *p, const QStyleOptionGraphicsItem *,
     else //с битмапом
     {
         p->setRenderHint(QPainter::SmoothPixmapTransform,true);
+        //вывести с увеличением
         QRectF target(-pixmapSize_.width()/2*max,
                       -pixmapSize_.height()/2*max-radius,
                       pixmapSize_.width()*max,pixmapSize_.height()*max);
@@ -125,6 +131,10 @@ void Platform::paint(QPainter *p, const QStyleOptionGraphicsItem *,
         p->drawPixmap(target,pixmap_,source);
     }
 }
+
+/*================================
+===      общедоступные функции   ===
+  ================================*/
 
 double Platform::angle() //угол в круге
 {
@@ -148,6 +158,27 @@ void Platform::setAngle(double a) //установить угол
 {
     lastAngle_ = angle_;
     angle_ = a;
+    emit update();
+}
+
+//увеличить размер вагонетки
+void Platform::incSize()
+{
+    bonusMax_ = 2.0;
+    emit update();
+}
+
+//уменьшить размер вагонетки
+void Platform::decSize()
+{
+    bonusMax_ = 0.5;
+    emit update();
+}
+
+//сделать размер платформы прежним / return to a normal state
+void Platform::returnPlatformSize()
+{
+    bonusMax_ = 1;
     emit update();
 }
 
@@ -186,11 +217,20 @@ void Platform::changeAngle(double da)
     }
 }
 
+/*================================
+===        ===========         ===
+===       ==         ==        ===
+===      ==  =======  ==       ===
+===      ==  =======  ==       ===
+===       ==         ==        ===
+===        ===========         ===
+==================================*/
+
 //найти нужный нам многоугольник
 QPolygonF Platform::findPolygon() const
 {
     double radius = circle_->radius(); //радиус круга смерти
-    double max = radius/CircleOfDeath::neededRadius; //увеличение
+    double max = radius/CircleOfDeath::neededRadius*bonusMax_; //увеличение
     double width = pixmapSize_.width() *max/2; //пол ширины вагонетки
     double height= pixmapSize_.height()*max/2; //пол высоты вагонетки
     //проекция высот на оси

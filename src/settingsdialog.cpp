@@ -21,14 +21,17 @@
 #include "ball.h"
 #include "constants.h"
 #include "windowfield.h"
+#include "score.h"
 
 SettingsDialog::SettingsDialog(Field *f, QWidget *parent) :
     QDialog(parent), field_(f), ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
     velocity_ = f->ball()->velocity(); //запомнить скорость
+    maxPoints_ = f->score()->maxPoint();
     //поместить значение скорости в виджет
     emit ui->startVelLineEdit->setText(QString::number(velocity_));
+    emit ui->maxPointsLineEdit->setText(QString::number(maxPoints_));
     //получить другую информацию
     for (int i=0; i<2; i++)
     {
@@ -72,7 +75,12 @@ void SettingsDialog::apconf()
     double newVelocity = ui->startVelLineEdit->text().toDouble();
     if (!equal(velocity_,newVelocity))
     { //если она не равна предыдущей изменить
-        field_->ball()->setVelocity(newVelocity);
+        field_->setBallsVelocity(newVelocity);
+    }
+    int newMaxPoints = ui->maxPointsLineEdit->text().toInt();
+    if (maxPoints_!=newMaxPoints)
+    {
+        field_->score()->setMaxPoint(newMaxPoints);
     }
     //установка игроков и управления тоже
     Gamer::Type newType;

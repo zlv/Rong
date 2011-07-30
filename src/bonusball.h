@@ -25,11 +25,18 @@
 #define BONUSBALL_H
 #include "ball.h" //родитель
 
+enum BonusType;
+
 class BonusBall : public Ball
 {
+    BonusType bonusType_;
+
 public:
-    BonusBall(Field*,double,Type,QString&,QGraphicsItem *parent=0);
+    BonusBall(Field*,double,Type,QString sImg=QString(""),QGraphicsItem *parent=0);
     void moveMe();
+    void setType(BonusType);
+private:
+    QString findFileName(BonusType);
 };
 
 #endif // BONUSBALL_H

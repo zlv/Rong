@@ -29,7 +29,7 @@ class NormalAI : public Gamer
 {
     Q_OBJECT
 
-    //нужно ли потока выполнять какие-нибудь
+    //нужно ли потоку выполнять какие-нибудь
     volatile bool initialized_; //действия
     QPointF ballPoint_; //координаты мяча
     volatile double angle_; //угол нашей вагонетки / angle of platform
@@ -37,7 +37,8 @@ class NormalAI : public Gamer
     volatile double vx_; //скорость раз / speed
     volatile double vy_; //скорость два
     volatile double circleRadius_; //размер круга смерти / our death circle
-    volatile int direction_; //1 -- право/right, 0 -- центр, -1 -- лево/left
+    //1 -- право/right, 0 -- центр, -1 -- лево/left
+    volatile int direction_;
     bool angleSpec_; //указан ли случайный угол вагонетки
     double tempAngle_; //вычисляемый угол
 public:

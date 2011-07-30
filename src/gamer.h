@@ -25,9 +25,10 @@
 #define GAMER_H
 #include <QThread> //любой объект этого вида может думать в отдельном потоке
 #include <QPointF> //точка
-#include "field.h" //поле
 
-class FieldData; //данные о поле
+class FieldData;
+class Field;
+
 class Gamer : public QThread
 {
     Q_OBJECT
@@ -57,6 +58,7 @@ protected:
     Field *field_; //связывающее всех поле
     Controls controls_; //тип управления
     volatile bool stopped_; //остановлен ли поток
+    bool directionSwaped_; //было ли управление изменено бонусом?
 
 public:
     Gamer(Field*,int,Type);
@@ -73,14 +75,17 @@ public:
     void setTimerTickdListening(); //слушать ли время
     Type type(); //вернуть тип
     Controls controls(); //какое управление
+    void swapDirection(); //переменить направление
+    void deswapDirection(); //поменить направление
 public slots:
     //изменить переменные
     virtual void changeDirection(FieldData&);
 protected:
+    //проверить, так ли изменён угол / correct angle
     void checkRedo();
 };
 
-struct FieldData
+struct FieldData //данные о поле
 {
     QPointF ballPoint; //точка, где мяч / where is ball?
     double platformAngle[2]; //где находятся вагонетки / where is platforms?
@@ -92,5 +97,6 @@ struct FieldData
     FieldData(QPointF,double,double,double,double);
     FieldData(QPointF,double,double,double,double,double,double,double);
 };
+
 
 #endif // GAMER_H

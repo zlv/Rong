@@ -20,21 +20,22 @@
 #include <QWidget>
 #include <math.h>
 #include <QDebug>
+#include "gamer.h"
 #include "constants.h"
 #include "circleofdeath.h"
 #include "platform.h"
 #include "score.h"
 
 BonusBall::BonusBall(Field* f, double v, Type t,
-                     QString& sImg, QGraphicsItem *parent)
-    : Ball(f,v,t,sImg,parent){}
+                     QString sImg, QGraphicsItem *parent)
+    : Ball(f,v,t,sImg,parent){showed_=0;}
 
 void BonusBall::moveMe()
 {
-    if (!painted_) return;
+    if (!painted_ || !showed_) return;
     bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);//если перестаёт пересекаться с кругом смерти
     bool crossPlatform[2];//если пересекается с одной из вагонеток
-    bool crossBall = collidesWithItem(field_->ball());
+    //bool crossBall = collidesWithItem(field_->ball());
     for (int i=0; i<2; i++)//2 вагонетки
     {
         crossPlatform[i] = collidesWithItem(field_->circle()->platform(i));//пересекается ли с iтой вагонеткой
@@ -48,21 +49,48 @@ void BonusBall::moveMe()
         arc=(arc>PI/2?PI-arc:arc);
         //изменение вектора движения шарика
         mirror(arc);
-    }/*
+    }
     if (crossPlatform[0]||crossPlatform[1])
+    {
+        int gamer=-1;
         if(crossPlatform[0])
-            bonus(0,vodka);
+            gamer=1;
         else
-            bonus(1,vodka);*/
-    if(crossBall)
-    {/*
-        if (field_->ball()->color()==Ball::RED)
-            bonus(0,vodka);
-        else
-            bonus(1,vodka);*/
+            gamer=0;
+        /*if(crossBall)
+        {
+            if (field_->ball()->color()==Ball::RED)
+                gamer=0;
+            else
+                if (field_->ball()->color()==Ball::BLUE)
+                    gamer=1;
+        }*/
+        field_->setBonusTime(bonusType_,gamer);
+        hide();
+        return;
     }
 
     //изменение координат шарика в соответствии с вектором движения
     point_=QPointF(point_.x()+vx_,point_.y()+vy_);
 }
 
+void BonusBall::setType(BonusType bt)
+{
+    bonusType_ = bt;
+    setImage(findFileName(bt));
+}
+
+QString BonusBall::findFileName(BonusType bt)
+{
+    switch (bt)
+    {
+    case PlusBallsBonus:
+        return ":/images/vkp0.png";
+    case IncPlatformSizeBonus:
+        return ":/images/vkp1.png";
+    case ChangeDirectionBonus:
+        return ":/images/vkp3.png";
+    default:
+        return "";
+    }
+}

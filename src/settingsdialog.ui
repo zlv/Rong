@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>433</width>
-    <height>256</height>
+    <width>437</width>
+    <height>296</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,12 +28,26 @@
       <item>
        <widget class="QLabel" name="startVelocityLabel">
         <property name="text">
-         <string>Start Velocity</string>
+         <string>Start Velovity</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="startVelLineEdit"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="maxPointsLabel">
+        <property name="text">
+         <string>Maximum Points</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="maxPointsLineEdit"/>
       </item>
      </layout>
     </item>

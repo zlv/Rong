@@ -31,6 +31,9 @@ SOURCES += \
 
 OTHER_FILES += \
     баги
-
+RC_FILE = rong.rc
 FORMS += \
     settingsdialog.ui
+
+RESOURCES += \
+    Rong.qrc

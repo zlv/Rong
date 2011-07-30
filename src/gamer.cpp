@@ -27,10 +27,11 @@
  *====================================*
  *====================================*/
 
-const double Gamer::dang=PI/120; //изменение угла / delta angle
+const double Gamer::dang=PI/36; //изменение угла / delta angle
 
 Gamer::Gamer(Field* f, int p, Type t) : platform_(p), type_(t),
-    listening_(0), field_(f), controls_(MousePressControl), stopped_(0){}
+    listening_(0), field_(f), controls_(MousePressControl), stopped_(0),
+    directionSwaped_(0){}
 
 /*================================
 ====      Открытые функции      ====
@@ -46,28 +47,28 @@ void Gamer::setControls(Gamer::Controls c) //указать управление
     controls_ = c;
     switch (c)
     {
-    case MousePressControl:
-        listening_ = mousePressListening;
-        break;
-    case MouseMoveControl:
-        listening_ = mouseMovedListening;
-        break;
-    case KeyrdNumbsAndArrows:
-        listening_ = keyrdNumbsListening+keyrdArrowListening
-                    +keyrdMovegListening;
-        break;
-    case KeyrdNumbsAndArrowsSpec:
-        listening_ = keyrdNumbsListening+keyrdArrowListening
-                    +keyrdSpeclListening;
-        break;
-    case KeyrdLetrsOnly:
-        listening_ = keyrdAnumsListening+keyrdWasdkListening
-                    +keyrdMovegListening;
-        break;
-    case KeyrdLetrsOnlySpec:
-        listening_ = keyrdAnumsListening+keyrdWasdkListening
-                    +keyrdSpeclListening;
-        break;
+        case MousePressControl:
+            listening_ = mousePressListening;
+            break;
+        case MouseMoveControl:
+            listening_ = mouseMovedListening;
+            break;
+        case KeyrdNumbsAndArrows:
+            listening_ = keyrdNumbsListening+keyrdArrowListening
+                        +keyrdMovegListening;
+            break;
+        case KeyrdNumbsAndArrowsSpec:
+            listening_ = keyrdNumbsListening+keyrdArrowListening
+                        +keyrdSpeclListening;
+            break;
+        case KeyrdLetrsOnly:
+            listening_ = keyrdAnumsListening+keyrdWasdkListening
+                        +keyrdMovegListening;
+            break;
+        case KeyrdLetrsOnlySpec:
+            listening_ = keyrdAnumsListening+keyrdWasdkListening
+                        +keyrdSpeclListening;
+            break;
     }
 }
 
@@ -109,6 +110,16 @@ Gamer::Controls Gamer::controls() //какое управление
     return controls_;
 }
 
+void Gamer::swapDirection() //переменить направление
+{
+    directionSwaped_ = 1;
+}
+
+void Gamer::deswapDirection() //поменить направление
+{
+    directionSwaped_ = 0;
+}
+
 //изменение переменных направления
 void Gamer::changeDirection(FieldData&){}
 
@@ -116,12 +127,15 @@ void Gamer::changeDirection(FieldData&){}
 ====    Функция, оставленная потомкам     ====
   ==========================================*/
 
+//проверить, так ли изменён угол / correct angle
 void Gamer::checkRedo()
 {
     CircleOfDeath *circle = field_->circle();
-    bool crossOver = circle->platform( platform_)->collidesWithItem(
-                circle->platform(!platform_));
-    if  (crossOver)  circle->platform( platform_)->redoAngle();
+    Platform *platform1 = circle->platform( platform_);
+    Platform *platform2 = circle->platform(!platform_);
+    //пересечение с другой вагонеткою
+    bool crossOver = platform1->collidesWithItem(platform2);
+    if  (crossOver)  platform1->redoAngle();
 }
 
 /*====================================*

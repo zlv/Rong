@@ -33,27 +33,43 @@ class Gamer; //и они тоже
 class Bonus;
 class BonusBall;
 class Score;
+//тип бонуса
+enum BonusType{NoBonus=0,PlusBallsBonus,IncPlatformSizeBonus,
+               ChangeDirectionBonus,BonusCount};
 class Field
 {
 protected:
     Ball *ball_; //мячик
+    Ball *extraBalls_[2]; //дополнительные мячи
     CircleOfDeath *circle_; //круг
     Gamer *gamer_[2]; //игроки
-    Bonus **bonuses_; //бонусы
+    Bonus *bonus_; //текущий бонусы
     BonusBall *bonusBall_; //мячик, несущий бонус
     Score *score_; //табличка со счётом
+    int bonusTime_; //длительность бонуса
+    BonusType currentBonus_; //тип действующего бонуса
+    //игрок, на которого действует бонус / gamer with bonus
+    int swappedDirGamer_;
 public:
-    //выводить ненужную информацию, а также вспомогательные линии
-    static const bool debug=0;
+    //выводить ненужную информацию, а также вспомогательные линии /
+    static const bool debug=0; //print text and red lines
 
     Field();
-    //пересоздать игрока
+    //пересоздать игрока / create gamer again
     virtual void recreateGamer(int,int);
     //функции доступа
     Ball* ball();
     CircleOfDeath* circle();
     Gamer* gamer(int);
     Score* score();
+    //установить параметры бонусов / set bonus settings
+    void setBonusTime(BonusType,int);
+    //включить дополнительные мячи / activate extra balls
+    void add2Balls();
+    //отлючить дополнительные мячи / detivate extra balls
+    void rmf2Balls();
+    //установить новую скорость мячей
+    void setBallsVelocity(double);
 };
 
 #endif // FIELD_H

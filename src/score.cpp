@@ -21,10 +21,9 @@
 #include <QPainter>
 #include <QWidget>
 
-Score::Score(Field *f) : field_(f)
+Score::Score(Field *f) : field_(f), maxPoint_(15)
 {
-    for (int i=0; i<2; i++)
-        score_[i] = 0;
+    clear();
 }
 
 QRectF Score::boundingRect() const //регион отсечения
@@ -42,7 +41,6 @@ void Score::paint(QPainter *p, const QStyleOptionGraphicsItem *,
                      QWidget *w)
 {
     bool horizontal = 1; //окно больше по горизонтали?
-   //QSize sz = w->size(); //размер окна
     if (w->height()>w->width()) horizontal = 0;
     QString sPnt[2];
     for (int i=0; i<2; i++) //получить строковое представление счёта
@@ -76,4 +74,44 @@ void Score::inc(int c)
 {
     score_[c]++;
     emit update(); //обновить рисунок
+}
+
+//проверить, есть ли победитель / check if game over
+bool Score::gameOver()
+{
+    int winner = -1;
+    for (int i=0; i<2; i++)
+        if (score_[i]>=maxPoint_) winner = i;
+    if (winner!=-1)
+    {
+        winner_ = winner;
+        return 1;
+    }
+    return 0;
+}
+
+//победитель
+int Score::winner()
+{
+    return winner_;
+}
+
+//обнулить
+void Score::clear()
+{
+    for (int i=0; i<2; i++)
+        score_[i] = 0;
+}
+
+//установить максимум очков
+void Score::setMaxPoint(int p)
+{
+    if (p==-1) return;
+    maxPoint_ = p;
+}
+
+//максимум очков
+int Score::maxPoint()
+{
+    return maxPoint_;
 }

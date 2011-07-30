@@ -24,50 +24,59 @@
 #include "noviceai.h"
 #include "normalai.h"
 #include "score.h"
+#include "platform.h" //вагонетки
 
-Field::Field()
+Field::Field() : bonusTime_(0), currentBonus_(NoBonus),
+    swappedDirGamer_(0)
 {
-    ball_ = new Ball(this,16);
-    QString filename="../images/vkp3.png";
-    bonusBall_ = new BonusBall(this,2,Ball::BonusBall,filename);
+    //мячик со скоростью побольше
+    ball_ = new Ball(this,18);
+    //бонус с небольшой скоростью
+    bonusBall_ = new BonusBall(this,2,Ball::BonusBall);
+    //круг смерти
     circle_ = new CircleOfDeath(this);
-    //создать для начала бота и человека
-    gamer_[0] = new Player(this,0);
-    gamer_[1] = new NormalAI(this,1);
-    gamer_[0]->setControls(Gamer::MousePressControl);
-    gamer_[1]->setTimerTickdListening();
     score_ = new Score(this); //панель со счётом
-    for (int i=0; i<2; i++) //включить бота (может это и не бот, но нам
-        gamer_[i]->start();  //совершенно пофиг)
+    for (int i=0; i<2; i++)
+    {
+        gamer_[i] = NULL;
+        //включить мячик
+        extraBalls_[i] = new Ball(this,ball_->velocity());
+        //и скрыть его
+        extraBalls_[i]->hide();
+    }
 }
 
 /*================================
 ====      Открытые функции      ====
   ================================*/
 
-//пересоздать игрока
+//пересоздать игрока / create gamer again
 void Field::recreateGamer(int g, int t)
 {
-    //убить существующего
-    gamer_[g]->stop();
-    while (gamer_[g]->type()!=Gamer::Human && !gamer_[g]->isFinished());
-    delete gamer_[g];
+    if (gamer_[g]!=NULL)
+    {
+        //убить существующего
+        gamer_[g]->stop();
+        //подождать завершения работы игрока
+        while (gamer_[g]->type()!=Gamer::Human && !gamer_[g]->isFinished());
+        delete gamer_[g]; //убить его
+    }
     //создать нового, смотря на тип / create new gamer with type t
     Gamer::Type type = static_cast<Gamer::Type>(t);
     switch (type)
     {
-    case Gamer::Novice:
-        gamer_[g] = new NoviceAI(this,g);
-        gamer_[g]->setTimerTickdListening();
-        break;
-    case Gamer::Normal:
-        gamer_[g] = new NormalAI(this,g);
-        gamer_[g]->setTimerTickdListening();
-        break;
-    case Gamer::Human:
-        gamer_[g] = new Player(this,g);
-        gamer_[g]->setMousePressListening();
-        break;
+        case Gamer::Novice:
+            gamer_[g] = new NoviceAI(this,g);
+            gamer_[g]->setTimerTickdListening();
+            break;
+        case Gamer::Normal:
+            gamer_[g] = new NormalAI(this,g);
+            gamer_[g]->setTimerTickdListening();
+            break;
+        case Gamer::Human:
+            gamer_[g] = new Player(this,g);
+            gamer_[g]->setMousePressListening();
+            break;
     }
     //запустить его поток
     emit gamer_[g]->start();
@@ -91,4 +100,58 @@ Ball* Field::ball() //мячик
 Score * Field::score() //панель счёта
 {
     return score_;
+}
+
+//установить параметры бонусов / set bonus settings
+void Field::setBonusTime(BonusType cb, int swdg)
+{
+    if (currentBonus_==NoBonus) //бонус пока не установлен
+    {
+        switch (cb)
+        {
+            case PlusBallsBonus:
+                //добавление мячей
+                add2Balls();
+                bonusTime_ = 1000;
+                break;
+            case IncPlatformSizeBonus:
+                //увеличение вагонетки
+                circle_->platform(!swdg)->incSize();
+                //уменьшение вагонетки
+                circle_->platform( swdg)->decSize();
+                bonusTime_ = 1200;
+                break;
+            case ChangeDirectionBonus:
+                gamer_[swdg]->swapDirection();
+                bonusTime_ = 200;
+            default:
+                break;
+        }
+    }
+    currentBonus_ = cb;
+    swappedDirGamer_ = swdg;
+}
+
+//включить дополнительные мячи / activate extra balls
+void Field::add2Balls()
+{
+    for (int i=0; i<2; i++)
+        extraBalls_[i]->renew();
+}
+
+//отлючить дополнительные мячи / detivate extra balls
+void Field::rmf2Balls()
+{
+    for (int i=0; i<2; i++)
+        extraBalls_[i]->hide();
+}
+
+//установить новую скорость мячей / nv -- new velocity
+void Field::setBallsVelocity(double nv)
+{
+    ball_->setVelocity(nv);
+    for (int i=0; i<2; i++)
+    {
+        extraBalls_[i]->setVelocity(nv);
+    }
 }

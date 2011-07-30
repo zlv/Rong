@@ -30,6 +30,9 @@ class Score : public QGraphicsItem
 {
     Field *field_; //поле, на котором мы
     int score_[2]; //очки
+    int maxPoint_; //максимум очков (если дошли, вышли)
+    int winner_; //номер победителя
+
 public:
     Score(Field*);
     //унаследованные функции
@@ -38,6 +41,11 @@ public:
     void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
     //увеличение счёта как ++ / change score (increment by 1)
     void inc(int);
+    bool gameOver(); //проверить, есть ли победитель / check if game over
+    int winner(); //победитель
+    void clear(); //обнулить
+    void setMaxPoint(int); //установить максимум очков
+    int maxPoint(); //максимум очков
 };
 
 #endif // SCORE_H

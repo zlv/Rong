@@ -47,30 +47,36 @@ protected:
   Field *field_;
   QPixmap pixmap_;
   bool painted_;
-  enum BallColor{RED,BLUE,WHITE} color_;
+  enum BallColor{RED,BLUE,WHITE} color_; // цвет мячика
   double vx_; //проекция вектора движения на ось X
   double vy_; //проекция вектора движения на ось Y
-  int time_;
+  bool showed_;
 public:
   enum Type{GameBall,BonusBall} type;
 
   Ball(Field*,double,QGraphicsItem *parent=0);
-  Ball(Field*,double,Type,QString&,QGraphicsItem *parent=0);
+  Ball(Field*,double,Type,QString,QGraphicsItem *parent=0);
     QRectF boundingRect() const;
     QPainterPath shape() const;
     void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
     void moveMe(); //движение мячика по таймеру / moving ball on timer
-    void mirror(double arc);
+    void mirror(double arc); // рассчёт изменения вектора при отражении
     QPointF point();
-    double vx();
-    double vy();
-    double velocity();
+    double vx(); // скорость по X
+    double vy();// скорость по Y
+    double velocity(); // скорость
     double color();
     void setVelocity(double);
     void setVelocity(double,double);
+    void show();
+    bool showed();
+    void hide();
+    void renew();
 protected:
+    void setRandomAngleVelocity(double);
     void changeColor();
     void drawBall();
+    void setImage(QString);
 };
 
 #endif // BALL_H

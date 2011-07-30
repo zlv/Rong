@@ -31,20 +31,14 @@ Player::Player(Field* f, int p) : Gamer(f,p,Human),
 
 void Player::mouseMoved(QPointF& p) //движение мыши
 {
-    if (listening_&mouseMovedListening)
-    {
-        emit field_->circle()->platform(platform_)->changeAngle(p);
-        checkRedo();
-    }
+    if (listening_&mouseMovedListening) //слушать передвижение мыши
+        moveMouse(p);
 }
 
 void Player::mousePress(QPointF& p) //нажатие на кнопку мыши
 {
-    if (listening_&mousePressListening)
-    {
-        emit field_->circle()->platform(platform_)->changeAngle(p);
-        checkRedo();
-    }
+    if (listening_&mousePressListening) //слушать нажатия
+        moveMouse(p);
 }
 
 void Player::keyPressed(int k) //нажатие на стрелку
@@ -54,21 +48,21 @@ void Player::keyPressed(int k) //нажатие на стрелку
     {
         Platform *platform = field_->circle()->platform(platform_);
         bool key = 1;
-        if (listening_&keyrdSpeclListening)
+        if (listening_&keyrdSpeclListening) //движение с курсором
         {
             switch (k)
             {
             case Qt::Key_Up:
-                cursor_.setY(cursor_.y()-dcoord);
+                cursor_.setY(cursor_.y()-dcoord*(directionSwaped_?-1:+1));
                 break;
             case Qt::Key_Left:
-                cursor_.setX(cursor_.x()-dcoord);
+                cursor_.setX(cursor_.x()-dcoord*(directionSwaped_?-1:+1));
                 break;
             case Qt::Key_Down:
-                cursor_.setY(cursor_.y()+dcoord);
+                cursor_.setY(cursor_.y()+dcoord*(directionSwaped_?-1:+1));
                 break;
             case Qt::Key_Right:
-                cursor_.setX(cursor_.x()+dcoord);
+                cursor_.setX(cursor_.x()+dcoord*(directionSwaped_?-1:+1));
                 break;
             default:
                 key = 0;
@@ -80,21 +74,26 @@ void Player::keyPressed(int k) //нажатие на стрелку
                 checkRedo();
             }
         }
+        //перемещение по двум сторонам
         else if (listening_&keyrdMovegListening)
         {
+            double angle;
             switch (k)
             {
             case Qt::Key_Up:
             case Qt::Key_Left:
-                //движение происходит влево, а не по часовой стрелке; поэтому в
-                emit platform->changeAngle((platform_?-1:1)*dang);//зависимости
-                checkRedo();
-                break;//от номера вагонетки ставится знак перед изменением угла
+                //движение происходит влево, а не по часовой стрелке;
+                angle = (platform_?-1:1)*dang*(directionSwaped_?-1:+1);
+                emit platform->changeAngle(angle);//поэтому в зависимости
+                checkRedo(); //от номера вагонетки ставится знак перед
+                break; //изменением угла
             case Qt::Key_Down:
             case Qt::Key_Right:
-                emit platform->changeAngle((platform_?1:-1)*dang);
-                checkRedo();
-                break;
+                //движение происходит влево, а не по часовой стрелке;
+                angle = (platform_?1:-1)*dang*(directionSwaped_?-1:+1);
+                emit platform->changeAngle(angle);//поэтому в зависимости
+                checkRedo(); //от номера вагонетки ставится знак перед
+                break; //изменением угла
             default:
                 key = 0;
             }
@@ -116,102 +115,54 @@ void Player::keyPressed(int k) //нажатие на стрелку
             switch (k)
             {
             case Qt::Key_W:
-                cursor_.setY(cursor_.y()-dcoord);
+                cursor_.setY(cursor_.y()-dcoord*(directionSwaped_?-1:+1));
                 break;
             case Qt::Key_A:
-                cursor_.setX(cursor_.x()-dcoord);
+                cursor_.setX(cursor_.x()-dcoord*(directionSwaped_?-1:+1));
                 break;
             case Qt::Key_S:
-                cursor_.setY(cursor_.y()+dcoord);
+                cursor_.setY(cursor_.y()+dcoord*(directionSwaped_?-1:+1));
                 break;
             case Qt::Key_D:
-                cursor_.setX(cursor_.x()+dcoord);
+                cursor_.setX(cursor_.x()+dcoord*(directionSwaped_?-1:+1));
                 break;
             default:
                 key = 0;
             }
             if (key)
             {
-                showCursor();
+                //показать курсор (или подсказку), если была нажата
+                showCursor(); //какая-нибудь из наших клавиш
                 checkRedo();
             }
         }
         else if (listening_&keyrdMovegListening)
         {
+            double angle;
             switch (k)
             {
             case Qt::Key_W:
             case Qt::Key_A:
-                //движение происходит влево, а не по часовой стрелке; поэтому в
-                emit platform->changeAngle((platform_?-1:1)*dang);//зависимости
-                checkRedo();
-                break;//от номера вагонетки ставится знак перед изменением угла
+                //движение происходит влево, а не по часовой стрелке;
+                angle = (platform_?-1:1)*dang*(directionSwaped_?-1:+1);
+                emit platform->changeAngle(angle);//поэтому в зависимости
+                checkRedo(); //от номера вагонетки ставится знак перед
+                break; //изменением угла
             case Qt::Key_S:
             case Qt::Key_D:
-                emit platform->changeAngle((platform_?1:-1)*dang);
-                checkRedo();
-                break;
+                //движение происходит влево, а не по часовой стрелке;
+                angle = (platform_?1:-1)*dang*(directionSwaped_?-1:+1);
+                emit platform->changeAngle(angle);//поэтому в зависимости
+                checkRedo(); //от номера вагонетки ставится знак перед
+                break; //изменением угла
             default:
                 key = 0;
             }
         }
         if (key)
         {
-            showCursor();
-            emit platform->changeAngle(cursor_);
-        }
-    }
-    if (listening_&keyrdWasdkListening)
-    {
-        Platform *platform = field_->circle()->platform(platform_);
-        bool key = 1;
-        if (listening_&keyrdSpeclListening)
-        {
-            switch (k)
-            {
-            case Qt::Key_W:
-                cursor_.setY(cursor_.y()-dcoord);
-                break;
-            case Qt::Key_A:
-                cursor_.setX(cursor_.x()-dcoord);
-                break;
-            case Qt::Key_S:
-                cursor_.setY(cursor_.y()+dcoord);
-                break;
-            case Qt::Key_D:
-                cursor_.setX(cursor_.x()+dcoord);
-                break;
-            default:
-                key = 0;
-            }
-            if (key)
-            {
-                showCursor();
-                checkRedo();
-            }
-        }
-        else if (listening_&keyrdMovegListening)
-        {
-            switch (k)
-            {
-            case Qt::Key_W:
-            case Qt::Key_A:
-                //движение происходит влево, а не по часовой стрелке; поэтому в
-                emit platform->changeAngle((platform_?-1:1)*dang);//зависимости
-                checkRedo();
-                break;//от номера вагонетки ставится знак перед изменением угла
-            case Qt::Key_S:
-            case Qt::Key_D:
-                emit platform->changeAngle((platform_?1:-1)*dang);
-                checkRedo();
-                break;
-            default:
-                key = 0;
-            }
-        }
-        if (key)
-        {
-            showCursor();
+            //показать курсор (или подсказку), если была нажата
+            showCursor(); //какая-нибудь из наших клавиш
             emit platform->changeAngle(cursor_);
         }
     }
@@ -230,8 +181,12 @@ void Player::keyPressed(int k) //нажатие на стрелку
         case Qt::Key_7:
         case Qt::Key_8:
         case Qt::Key_9:
-            int num = k-Qt::Key_1;
-            double angle = PI+(platform_?+1:-1)*PI*(num*2+1)/18;
+            int num = k-Qt::Key_1; //номер сектора для перехода
+            //угол перехода
+            double angle = (PI*(num*2+1)/18*(platform_?+1:-1));
+            //бонусное искажение
+            if (directionSwaped_) angle = PI-angle;
+            angle+=PI;
             emit platform->setAngle(angle);
             checkRedo();
             showCursor();
@@ -278,7 +233,11 @@ void Player::keyPressed(int k) //нажатие на стрелку
         }
         if (key)
         {
-            double angle = PI+(platform_?+1:-1)*PI*(num*2+1)/18;
+            //угол перехода
+            double angle = (PI*(num*2+1)/18*(platform_?+1:-1));
+            //бонусное искажение
+            if (directionSwaped_) angle = PI-angle;
+            angle+=PI;
             emit platform->setAngle(angle);
             checkRedo();
             showCursor();
@@ -358,4 +317,16 @@ bool Player::isLetrsShape() //надо ли показывать посказк�
      || controls_==KeyrdLetrsOnlySpec)
         return 1;
     return 0;
+}
+
+void Player::moveMouse(QPointF& p) //изменение позиции мыши
+{
+    QPoint point;
+    point.setY(p.y());
+    if (directionSwaped_) //изменять направление, если включен бонус
+        point.setX(-p.x());
+    else
+        point.setX( p.x());
+    emit field_->circle()->platform(platform_)->changeAngle(point);
+    checkRedo(); //проверка, правильно ли изменён угол
 }

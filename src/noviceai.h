@@ -29,12 +29,13 @@ class NoviceAI : public Gamer
 {
     Q_OBJECT
 
-    //нужно ли потока выполнять какие-нибудь
+    //нужно ли потоку выполнять какие-нибудь
     volatile bool initialized_; //действия
     QPointF ballPoint_; //координаты мяча
     volatile double angle_; //угол нашей вагонетки / angle of platform
     volatile double limiter_; //её минимальный угол
-    volatile int direction_; //1 -- право, 0 -- центр, -1 -- лево
+    //1 -- право/right, 0 -- центр, -1 -- лево/left
+    volatile int direction_;
 public:
     //угол, который должен быть до мяча, чтобы компьютер
     static const double novicedang; //сделал шаг

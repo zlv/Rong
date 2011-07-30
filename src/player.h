@@ -28,12 +28,13 @@
 
 class Player : public Gamer
 {
-    static const int dcoord = 10;
+    static const int dcoord = 10; //изменение координаты по стрелками
+    //время, на которое появляется курсор
     static const int cursorTimeStd = 200;
-    QPointF cursor_;
-    bool showCursor_;
-    int cursorTime_;
-    int cursorPlayer_;
+    QPointF cursor_; //координаты курсора
+    bool showCursor_; //показан ли курсор / cursor showed?
+    int cursorTime_; //время показа курсора
+
 public:
     Player(Field*,int);
     //переопределение функций Игрока / redefinition of Gamer's functions
@@ -50,6 +51,8 @@ public:
     bool isCrossShape(); //надо ли показывать перекрестие
     bool isNumbsShape(); //надо ли показывать посказку с цифрами
     bool isLetrsShape(); //надо ли показывать посказку с буквами
+private:
+    void moveMouse(QPointF&); //изменение позиции мыши
 };
 
 #endif // PLAYER_H

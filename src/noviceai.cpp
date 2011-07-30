@@ -46,6 +46,8 @@ void NoviceAI::changeDirection(FieldData& d)
 {
     initialized_ = 1;
     ballPoint_ = d.ballPoint;
+    if (directionSwaped_)
+        ballPoint_.setX(-ballPoint_.x());
     angle_ = d.platformAngle[platform_];
     limiter_ = d.platformLimiter[platform_];
 }

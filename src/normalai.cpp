@@ -16,7 +16,7 @@
 =========================================================================*/
 /*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
-#include "normalai.h"
+#include "normalai.h" //эт'о йа
 #include "circleofdeath.h" //круг смерти
 #include "platform.h" //вагонетка
 #include "constants.h" //пи
@@ -49,6 +49,11 @@ void NormalAI::changeDirection(FieldData& d)
     angle_ = d.platformAngle[platform_];
     limiter_ = d.platformLimiter[platform_];
     vx_ = d.vx;
+    if (directionSwaped_)
+    {
+        vx_ = -vx_;
+        ballPoint_.setX(-ballPoint_.x());
+    }
     vy_ = d.vy;
     circleRadius_ = d.circleRadius;
 }

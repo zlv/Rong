@@ -23,6 +23,7 @@
 
 int main(int argc, char **argv)
 {
+    Q_INIT_RESOURCE(Rong);
     QApplication app(argc,argv);
 
     //загрузка языка / load language
@@ -37,6 +38,8 @@ int main(int argc, char **argv)
     //размеры окна
     window.setBaseSize(800,600);
     window.setGeometry(50,50,800,600);
+    window.setWindowIcon(QIcon(":/images/ico.png"));
+    window.setWindowIconText("Rong");
     window.show();
 
     return app.exec();

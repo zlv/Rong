@@ -33,6 +33,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QAction>
+#include <set> //клавиши
 
 class FieldData;
 class View;
@@ -41,6 +42,7 @@ class WindowField : public QMainWindow, public Field
 {
     Q_OBJECT
 
+private:
     QGraphicsScene scene_; //сцена для объектов Qt
     SettingsDialog *settingsDialog_; //параметры
     View *view_; //виджет с элементами
@@ -54,12 +56,24 @@ public:
     WindowField();
     void recreateGamer(int,int); //создать игрока заново
     void update(); //обновить виджет-сцену / update scene widget
-    void timerEvent(QTimerEvent *); //основной таймер приложения
+    void timerEvent(QTimerEvent*); //основной таймер приложения
+    bool isPause(); //нажата ли пауза
+    void readSettings(); //читать параметры
+    void writeSettings(); //сохранить параметры
+protected:
+    void closeEvent(QCloseEvent*); //закрыть
 private slots:
+    void newGame(); //обнулить счёт, начать новую игру
     void showSettings(); //показать диалог настройки
-    void pause(); //установить паузу
+    void pause(); //установить/убрать паузу
 private:
     void createMenu(); //создать разные меньюшки
+    bool canCreateBonus(); //существует ли возможность создать бонус
+    void createBonusBall(); //создать мяч бонуса
+    void changeBonusState(); //проходит время бонуса
+    void endBonus(BonusType); //завершить бонус
+    void gameOver(); //показать сообщение об окончании игры
+    int random(int); //случайное число
 signals:
     //вызывается по таймеру, изменяет данные для бота / called then
     void goBot(FieldData&); //data, needed for bot is changed
@@ -74,6 +88,8 @@ class View : public QGraphicsView
     WindowField *field_;
     //переменная нужна, чтобы отслеживать перетаскивание мышью
     bool mousePressed_;
+    //клавиши
+    std::set<int> keys_;
 
 public:
     View(QGraphicsScene*,WindowField*);
@@ -81,6 +97,8 @@ public:
     void mouseMoveEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
     void keyPressEvent(QKeyEvent*);
+    void keyReleaseEvent(QKeyEvent*);
+    void keyPushed(int);
 };
 
 #endif // WINDOWFIELD_H

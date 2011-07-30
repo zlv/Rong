@@ -25,6 +25,7 @@
 #include <QWidget>  //размеры окна
 #include <math.h>
 
+//буквы, обозначающие клавишу, на которую нужно нажимать
 const QString CircleOfDeath::letters[9] =
     {QObject::tr("V"),QObject::tr("B"),QObject::tr("N"),
      QObject::tr("G"),QObject::tr("H"),QObject::tr("J"),
@@ -126,7 +127,7 @@ void CircleOfDeath::paint(QPainter *p, const QStyleOptionGraphicsItem *,
                     double angle = PI+(playerNum?+1:-1)*(i*2+1)*PI/18;
                     //разместить возле круга
                     coord.setX(1.05*radius_*cos(angle));
-                    coord.setY(1.05*radius_*sin(angle)+p->font().pointSize()/2);
+                    coord.setY(1.05*radius_*sin(angle)+p->font().pointSize()/2);\
                     p->drawText(coord,QString::number(i+1));
                 }
             }

@@ -29,21 +29,19 @@ Ball::Ball(Field *f, double v, QGraphicsItem *parent)  :
     QGraphicsItem
     (parent), radius_(10), point_(0,0),
     field_(f), pixmap_(62,62), painted_(0),
-    color_(WHITE), type(GameBall)
+    color_(WHITE), showed_(1), type(GameBall)
 {
-    double angle = PI*qrand()*2/RAND_MAX;
-    setVelocity(v,angle);
+    setRandomAngleVelocity(v);
     drawBall();
 }
 
-Ball::Ball(Field *f, double v, Type t, QString& sImg, QGraphicsItem *parent)
+Ball::Ball(Field *f, double v, Type t, QString sImg, QGraphicsItem *parent)
     : QGraphicsItem(parent), radius_(10), point_(0,0),
     field_(f), pixmap_(sImg), painted_(0),
-    color_(WHITE), type(t)
+    color_(WHITE), showed_(1), type(t)
 {
     if(t==BonusBall)radius_*=3;
-    double angle = PI*qrand()*2/RAND_MAX;
-    setVelocity(v,angle);
+    setRandomAngleVelocity(v);
 }
 
 /*================================
@@ -72,6 +70,7 @@ QPainterPath Ball::shape() const
 //рисование мячика
 void Ball::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget*)
 {
+    if (!showed_) return;
     double radius = field_->circle()->radius(); //радиус круга смерти
     double max = radius/CircleOfDeath::neededRadius; //увеличение
     QRectF target(point_.x()-radius_*max,point_.y()-radius_*max,
@@ -82,13 +81,13 @@ void Ball::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget*)
 }
 
 /*================================
-====      Открытая функция      ====
+===   собственные   функции    ===
   ================================*/
 
 //движение мячика по таймеру / moving ball on timer
 void Ball::moveMe()
 {
-    if (!painted_) return;
+    if (!painted_ || !showed_) return;
     bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);//если перестаёт пересекаться с кругом смерти
     bool crossPlatform[2];//если пересекается с одной из вагонеток
     for (int i=0; i<2; i++)//2 вагонетки
@@ -350,6 +349,12 @@ double Ball::vy()
     return vy_;
 }
 
+void Ball::setRandomAngleVelocity(double v)
+{
+    double angle = PI*qrand()*2/RAND_MAX;
+    setVelocity(v,angle);
+}
+
 //изменить цвет мяча
 void Ball::changeColor()
 {
@@ -367,6 +372,7 @@ double Ball::velocity()
 
 void Ball::setVelocity(double v)
 {
+    if (v<0) return;
     double angle = atan(vy_/vx_);
     if (vx_<0) angle+=PI;
     setVelocity(v,angle);
@@ -376,6 +382,32 @@ void Ball::setVelocity(double v, double a)
 {
     vx_ = cos(a)*v;
     vy_ = sin(a)*v;
+}
+
+void Ball::show()
+{
+    point_ = QPoint(0,0);
+    showed_ = 1;
+    setRandomAngleVelocity(sqrt(vx_*vx_+vy_*vy_));
+}
+
+bool Ball::showed()
+{
+    return showed_;
+}
+
+void Ball::hide()
+{
+    showed_ = 0;
+}
+
+void Ball::renew()
+{
+    color_ = WHITE;
+    point_ = QPoint(0,0);
+    setVelocity(velocity());
+    show();
+    drawBall();
 }
 
 //нарисовать мячик с новым цветом
@@ -399,6 +431,11 @@ void Ball::drawBall()
     p->drawEllipse(QPointF(radius_,radius_),static_cast<int>(radius_),
                           static_cast<int>(radius_));
     delete p;
+}
+
+void Ball::setImage(QString sImg)
+{
+    pixmap_ = QPixmap(sImg);
 }
 
 double Ball::color()
