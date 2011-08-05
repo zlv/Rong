@@ -19,6 +19,7 @@
 #include "field.h" //этот класс
 #include "ball.h"
 #include "bonusball.h" // бонусный мячик
+#include "magnet.h"
 #include "circleofdeath.h"
 #include "player.h"
 #include "noviceai.h"
@@ -33,12 +34,14 @@ Field::Field() : bonusTime_(0), currentBonus_(NoBonus),
     ball_ = new Ball(this,18);
     //бонус с небольшой скоростью
     bonusBall_ = new BonusBall(this,2,Ball::BonusBall);
+    //магнит обычный
+    magnet_ = new Magnet(this,":/images/vkp2.png");
     //круг смерти
     circle_ = new CircleOfDeath(this);
     score_ = new Score(this); //панель со счётом
     for (int i=0; i<2; i++)
     {
-        gamer_[i] = NULL;
+        gamer_[i] = NULL; //игроки потом
         //включить мячик
         extraBalls_[i] = new Ball(this,ball_->velocity());
         //и скрыть его
@@ -124,6 +127,9 @@ void Field::setBonusTime(BonusType cb, int swdg)
             case ChangeDirectionBonus:
                 gamer_[swdg]->swapDirection();
                 bonusTime_ = 200;
+                break;
+            case MagnetBonus:
+                 bonusTime_ = 1200;
             default:
                 break;
         }

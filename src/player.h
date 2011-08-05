@@ -4,7 +4,8 @@
 == включает интерфейс обработки событий, действий, мозговых импульсов    ==
 == пользователя. /                                                       ==
 ==                                                                       ==
-==   Player -- class representing interactions with people (users).      ==
+==   Player -- class representing interactions with people (users). Can  ==
+==  be controlled with different types of keys or mouse cursor.          ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -28,12 +29,12 @@
 
 class Player : public Gamer
 {
-    static const int dcoord = 10; //изменение координаты по стрелками
-    //время, на которое появляется курсор
+    static const int dcoord = 10; //изменение координаты по стрелкам
+    //время, на которое появляется курсор / start time
     static const int cursorTimeStd = 200;
-    QPointF cursor_; //координаты курсора
+    QPointF cursor_; //координаты курсора / cursor coordinates
     bool showCursor_; //показан ли курсор / cursor showed?
-    int cursorTime_; //время показа курсора
+    int cursorTime_; //время показа курсора / time for what cursor exist
 
 public:
     Player(Field*,int);

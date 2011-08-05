@@ -8,10 +8,10 @@
 == также может отталкиваться от других мячиков, для этого ему необходима ==
 == ссылка на поле, где он находится (Field*).                            ==
 ==   Мячик -- самый умный элемент в игре, ему пригодятся скорость и уско-==
-== рение, а также мифический коэффициент притягивания. Имеет потомков,   ==
-== которые называются бонусами. /                                        ==
+== рение, а также мифический коэффициент притягивания [которого действи- ==
+== тельно нет!]. Имеет потомков, которые называются бонусами. /          ==
 ==                                                                       ==
-==   Ball -- ball or bonus.                                              ==
+==   Ball -- ball or bonus (inheritance).                                ==
 ==   Description:                                                        ==
 ==   Its flying upon the field, its real, its real.                      ==
 ===========================================================================
@@ -52,7 +52,7 @@ protected:
   double vy_; //проекция вектора движения на ось Y
   bool showed_;
 public:
-  enum Type{GameBall,BonusBall} type;
+  enum Type{GameBall,BonusBall} type; //бонус или нет
 
   Ball(Field*,double,QGraphicsItem *parent=0);
   Ball(Field*,double,Type,QString,QGraphicsItem *parent=0);
@@ -60,18 +60,20 @@ public:
     QPainterPath shape() const;
     void paint(QPainter *, const QStyleOptionGraphicsItem *,QWidget*);
     void moveMe(); //движение мячика по таймеру / moving ball on timer
+    void magnetMe();
+    void chmag(double point,bool x,double power);
     void mirror(double arc); // рассчёт изменения вектора при отражении
     QPointF point();
     double vx(); // скорость по X
     double vy();// скорость по Y
     double velocity(); // скорость
     double color();
-    void setVelocity(double);
-    void setVelocity(double,double);
-    void show();
-    bool showed();
+    void setVelocity(double); //поставить скорость по модулю
+    void setVelocity(double,double); //поставить скорость по углу и модулю
+    void show(); //разместить заново
+    bool showed(); //вообще мяч есть?
     void hide();
-    void renew();
+    void renew(); //обнулить все значения
 protected:
     void setRandomAngleVelocity(double);
     void changeColor();

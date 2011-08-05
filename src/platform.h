@@ -1,10 +1,10 @@
 /*=========================================================================
 ==                           platform.h                                  ==
 ==   Platform -- Вагонетка, объект, перемещающийся по кругу смерти и от- ==
-== бивающий мячи. Может иметь разные цвета[, размеры].  /                ==
+== бивающий мячи. Может иметь разные цвета, размеры.  /                  ==
 ==                                                                       ==
 ==   Platform -- platform for playing, for pushing ball, for             ==
-==  entertaining.                                                        ==
+==  entertaining. You can play with ball using platform of your color    ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==

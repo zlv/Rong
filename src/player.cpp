@@ -20,6 +20,7 @@
 #include "circleofdeath.h"
 #include "platform.h"
 #include "constants.h"
+#include "field.h" //поле, на котором мы все
 
 Player::Player(Field* f, int p) : Gamer(f,p,Human),
     showCursor_(0){}

@@ -18,12 +18,13 @@
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #include "score.h" //это я
 #include "circleofdeath.h"
+#include "field.h" //поле, где мы
 #include <QPainter>
 #include <QWidget>
 
 Score::Score(Field *f) : field_(f), maxPoint_(15)
 {
-    clear();
+    clear(); //обнулить счёт
 }
 
 QRectF Score::boundingRect() const //регион отсечения
@@ -37,11 +38,11 @@ QPainterPath Score::shape() const
     return QPainterPath(); //это тоже
 }
 
-void Score::paint(QPainter *p, const QStyleOptionGraphicsItem *,
-                     QWidget *w)
+void Score::paint(QPainter *p, const QStyleOptionGraphicsItem*,
+                  QWidget *w)
 {
     bool horizontal = 1; //окно больше по горизонтали?
-    if (w->height()>w->width()) horizontal = 0;
+    if (w->height() > w->width()) horizontal = 0;
     QString sPnt[2];
     for (int i=0; i<2; i++) //получить строковое представление счёта
         sPnt[i] = QString::number(score_[i]);

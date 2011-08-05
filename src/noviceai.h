@@ -1,6 +1,7 @@
 /*=========================================================================
 ==                             noviceai.h                                ==
-==   NoviceAI -- начинающий бот. /                                       ==
+==   NoviceAI -- начинающий бот. Тупит, бегая за мячом буквально. Всегда ==
+== бегает, достаёт даже./                                                ==
 ==                                                                       ==
 ==   NoviceAI -- bot-beginner.                                           ==
 ==                                                                       ==
@@ -23,7 +24,6 @@
 #ifndef NOVICEAI_H
 #define NOVICEAI_H
 #include "gamer.h"
-#include <QMutex>
 
 class NoviceAI : public Gamer
 {

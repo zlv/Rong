@@ -11,7 +11,9 @@ HEADERS += \
     bonusball.h \
     score.h \
     normalai.h \
-    settingsdialog.h
+    settingsdialog.h \
+    magnet.h \
+    aboutdialog.h
 
 SOURCES += \
     field.cpp \
@@ -27,13 +29,16 @@ SOURCES += \
     score.cpp \
     normalai.cpp \
     settingsdialog.cpp \
-    constants.cpp
+    constants.cpp \
+    magnet.cpp \
+    aboutdialog.cpp
 
 OTHER_FILES += \
     баги
 RC_FILE = rong.rc
 FORMS += \
-    settingsdialog.ui
+    settingsdialog.ui \
+    aboutdialog.ui
 
 RESOURCES += \
     Rong.qrc

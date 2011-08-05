@@ -28,8 +28,8 @@ SettingsDialog::SettingsDialog(Field *f, QWidget *parent) :
 {
     ui->setupUi(this);
     velocity_ = f->ball()->velocity(); //запомнить скорость
-    maxPoints_ = f->score()->maxPoint();
-    //поместить значение скорости в виджет
+    maxPoints_ = f->score()->maxPoint(); //максимальный счёт
+    //поместить значение скорости и счёт в виджет
     emit ui->startVelLineEdit->setText(QString::number(velocity_));
     emit ui->maxPointsLineEdit->setText(QString::number(maxPoints_));
     //получить другую информацию
@@ -74,12 +74,13 @@ void SettingsDialog::apconf()
     //указанная пользователем скорость
     double newVelocity = ui->startVelLineEdit->text().toDouble();
     if (!equal(velocity_,newVelocity))
-    { //если она не равна предыдущей изменить
+    { //если она не равна предыдущей, изменить
         field_->setBallsVelocity(newVelocity);
     }
+    //макс очки
     int newMaxPoints = ui->maxPointsLineEdit->text().toInt();
     if (maxPoints_!=newMaxPoints)
-    {
+    { //тоже изменить тогда же
         field_->score()->setMaxPoint(newMaxPoints);
     }
     //установка игроков и управления тоже
@@ -100,6 +101,7 @@ void SettingsDialog::apconf()
             field_->gamer(0)->setControls(newControls);
         }
     }
+    //второй игрок
     newType = static_cast<Gamer::Type>(ui->player02ComboBox->currentIndex());
     if (type_[1]!= newType)
     {

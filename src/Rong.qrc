@@ -2,9 +2,10 @@
     <qresource prefix="/">
         <file>images/vkp1.png</file>
         <file>images/vkp0.png</file>
-        <file>images/vkp3.png</file>
         <file>images/platform-blu.png</file>
         <file>images/platform-red.png</file>
         <file>images/ico.png</file>
+        <file>images/vkp3.png</file>
+        <file>images/vkp2.png</file>
     </qresource>
 </RCC>

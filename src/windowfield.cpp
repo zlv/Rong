@@ -19,67 +19,80 @@
 #include "windowfield.h" //this class
 #include "ball.h" //мячик
 #include "bonusball.h" // бонусный мячик
+#include "magnet.h" //бонусный магнит
 #include "circleofdeath.h" //круг смерти
-#include "platform.h"
-#include "noviceai.h"
-#include "normalai.h"
-#include "score.h"
-#include "player.h"
+#include "platform.h" //вагонетка
+#include "noviceai.h" //новичок-бот
+#include "normalai.h" //опытный-бот
+#include "score.h" //счёт
+#include "player.h" //человеч-игрок
+#include "aboutdialog.h" //о программе
+#include "settingsdialog.h" //параметры
 #include <QMouseEvent>
 #include <QMenuBar>
 #include <QMenu>
-#include <QTime>
+#include <QTime> //почтислучайное зерно
 #include <QMessageBox>
 #include <QSettings>
 
 WindowField::WindowField() : pause_(0)
 {
     qsrand(QTime::currentTime().msec());
-    //добавить элементы
+    //добавить элементы / add all objects to scene
     scene_.addItem(circle_);
+    scene_.addItem(magnet_);
+    scene_.addItem(score_);
     scene_.addItem(ball_);
     scene_.addItem(bonusBall_);
-    scene_.addItem(score_);
+    for (int i=0; i<2; i++)
+        scene_.addItem(extraBalls_[i]);
+
     /*создать виджет, размещающий объекты и обрабатывающий события мыши и
-    клавиатуры*/
+    клавиатуры / create object for mouse and keyboard tracking*/
     view_ = new View(&scene_,this);
     view_->show();
     setCentralWidget(view_);
+
     startTimer(25); //таймер
-    for (int i=0; i<2; i++)
-        scene_.addItem(extraBalls_[i]);
-    createMenu();
-    readSettings();
+
+    createMenu(); //создать меню
+
+    readSettings(); //прочитать настройки
+
+    //создать игроков
     if (gamer_[0]==NULL)
     {
-        //создать для начала бота и человека
+        //по умолчанию один из нас человек
         gamer_[0] = new Player(this,0);
         gamer_[0]->setControls(Gamer::MousePressControl);
         gamer_[0]->start();
     }
     if (gamer_[1]==NULL)
     {
+        //а второй -- бот
         gamer_[1] = new NormalAI(this,1);
-        //управление
         gamer_[1]->setTimerTickdListening();
         gamer_[1]->start();
-        connect(this,SIGNAL(goBot(FieldData&)), //для бота
-                (gamer_[1]),SLOT(changeDirection(FieldData&)));
+        connect(this,SIGNAL(goBot(FieldData&)),
+                gamer_[1],SLOT(changeDirection(FieldData&)));
     }
+
+    //настройка
     settingsDialog_ = new SettingsDialog(this,this);
 }
 
 //создать игрока заново
 void WindowField::recreateGamer(int g, int t)
 {
-    //игрока не надо создавать
     if (t==-1)
     {
-        gamer_[g] = NULL;
+        gamer_[g] = NULL; //игрока не надо создавать / don't need to create
         return;
     }
+
     disconnect(this,SIGNAL(goBot(FieldData&)));
-    Field::recreateGamer(g,t);
+
+    Field::recreateGamer(g,t); //создание в другом объекте в общем
 
     connect(this,SIGNAL(goBot(FieldData&)), //для бота
             (gamer_[g]),SLOT(changeDirection(FieldData&)));
@@ -90,30 +103,38 @@ void WindowField::update() //обновить виджет-сцену / update s
     scene_.update();
 }
 
-//основной таймер приложения
+//основной таймер приложения / first and only one timer of the application
 void WindowField::timerEvent(QTimerEvent*)
 {
-    if (pause_) return;
-    if (score_->gameOver()) //проверить окончание игры
-        gameOver();
-    ball_->moveMe(); //двигать мяч
+    if (pause_) return; //у нас перерыв, дальше не идём
+
+    if (score_->gameOver()) //проверить окончание игры / check if it is
+        gameOver(); //needed to start new game
+
+    //двигать мячи / move balls
+    ball_->moveMe();
     if (bonusBall_->showed())
         bonusBall_->moveMe();
-    //данные для бота
+
+    //данные для бота / data for a computer (other thread)
     FieldData data(ball_->point(),circle_->platform(0)->angle(),
                                   circle_->platform(1)->angle(),
                    circle_->limiter(0), circle_->limiter(1),
                    ball_->vx(),ball_->vy(), circle_->radius());
 
+    //при возможности, и если повезёт, создать бонус
     if (canCreateBonus())
         createBonusBall();
 
     if (currentBonus_!=NoBonus)
-        changeBonusState();
+        changeBonusState(); //часики для бонуса тикают
 
-    //сообщить боту где мяч, и где его ваго-
-    emit goBot(data); //нетка
-    for (int i=0; i<2; i++) //сообщить каждому игроку об изменении времени
+    //сообщить боту где мяч, и где его вагонетка / tell bot about us
+    emit goBot(data);
+
+    /*сообщить каждому игроку об изменении оставшегося времени курсора и
+    каждому боту о том, что нужно уже двигать вагонетку*/
+    for (int i=0; i<2; i++)
     {
         if (gamer(i)->type()==Gamer::Human)
             gamer(i)->decCursorTime();
@@ -121,17 +142,18 @@ void WindowField::timerEvent(QTimerEvent*)
             gamer(i)->timerTickd();
         extraBalls_[i]->moveMe();
     }
+
     scene_.update();
 }
 
-bool WindowField::isPause() //нажата ли пауза
+bool WindowField::isPause() //нажата ли пауза / is pause button toggled?
 {
     return pause_;
 }
 
 void WindowField::readSettings() //читать параметры
 {
-    QSettings settings("BDL Inc.","Rong");
+    QSettings settings("ZKL Inc.","Rong");
 
     score_->setMaxPoint(settings.value("maxValue_",-1).toInt());
     recreateGamer(0,settings.value("playerType1_",-1).toInt());
@@ -141,7 +163,7 @@ void WindowField::readSettings() //читать параметры
 
 void WindowField::writeSettings() //сохранить параметры
 {
-    QSettings settings("BDL Inc.","Rong");
+    QSettings settings("ZKL Inc.","Rong");
 
     settings.setValue("maxValue_",score_->maxPoint());
     settings.setValue("playerType1_",gamer(0)->type());
@@ -177,48 +199,77 @@ void WindowField::pause() //установить/убрать паузу
     pause_ = !pause_;
 }
 
+void WindowField::about() //о программе
+{
+    AboutDialog dialog;
+    dialog.exec();
+}
+
 void WindowField::createMenu() //создать разные меньюшки
 {
+    //новая игра
     newGameAction_  = new QAction(tr("&New game"),this);
     newGameAction_->setShortcut(QKeySequence("Ctrl+N"));
     connect(newGameAction_,SIGNAL(triggered()),this,SLOT(newGame()));
+    //настройки игры
     settingsAction_ = new QAction(tr("&Set gamers and ball velocity"),this);
     connect(settingsAction_,SIGNAL(triggered()),this,SLOT(showSettings()));
     settingsAction_->setShortcut(QKeySequence("Esc"));
+    //пауза
     pauseAction_ = new QAction(tr("&Pause"),this);
     connect(pauseAction_,SIGNAL(triggered()),this,SLOT(pause()));
     pauseAction_->setShortcut(QKeySequence("P"));
+    //выход
     quitAction_     = new QAction(tr("&Quit"),this);
     connect(quitAction_,SIGNAL(triggered()),this,SLOT(close()));
-    QMenu *fileMenu = new QMenu(tr("&File"),this);
+    //большое меню игра
+    QMenu *fileMenu = new QMenu(tr("&Game"),this);
     fileMenu->addAction(newGameAction_);
     fileMenu->addAction(settingsAction_);
     fileMenu->addAction(pauseAction_);
     fileMenu->addSeparator();
     fileMenu->addAction(quitAction_);
     menuBar()->addMenu(fileMenu);
+    //меню справка
+    QMenu *helpMenu = new QMenu(tr("&Help"),this);
+    QAction *aboutAction = new QAction(tr("&About Rong"),this);
+    connect(aboutAction,SIGNAL(triggered()),this,SLOT(about()));
+    helpMenu->addAction(aboutAction);
+    menuBar()->addMenu(helpMenu);
 }
 
 //существует ли возможность создать бонус
 bool WindowField::canCreateBonus()
 {
+    /*если нет бонуса, бонусного мяча и ещё если нам повезло /
+      set if there are no bonus, no bonus balls and */
     return currentBonus_==NoBonus
         && !bonusBall_->showed()
+        && !magnet_->showed()
         && (random(8313)<=3);
 }
 
 void WindowField::createBonusBall() //создать мяч бонуса
 {
     BonusType bonus = static_cast<BonusType>(random(BonusCount-2)+1);
-    bonusBall_->setType(bonus);
-    bonusBall_->show();
+    if(bonus!=MagnetBonus){
+        //обычный бонус
+        bonusBall_->setType(bonus);
+        bonusBall_->show();
+    }
+    else
+    {
+        //магнитобонус
+        setBonusTime(MagnetBonus,1);
+        magnet_->show();
+    }
 }
 
 void WindowField::changeBonusState() //проходит время бонуса
 {
     if (bonusTime_)
         bonusTime_--;
-    if (!bonusTime_)
+    if (!bonusTime_) //закончить бонус, когда кончится время
     {
         endBonus(currentBonus_);
         currentBonus_ = NoBonus;
@@ -240,6 +291,10 @@ void WindowField::endBonus(BonusType t) //завершить бонус
     case ChangeDirectionBonus:
         //вернуть направления
         gamer_[swappedDirGamer_]->deswapDirection();
+        break;
+    case MagnetBonus:
+        //убрать магнит
+        magnet_->hide();
     default:
         break;
     }
@@ -248,10 +303,10 @@ void WindowField::endBonus(BonusType t) //завершить бонус
 //показать сообщение об окончании игры
 void WindowField::gameOver()
 {
-    QString sRed  = tr("Red");
-    QString sBlue = tr("Blue");
+    QString sRed  = tr("Red"); //красный
+    QString sBlue = tr("Blue"); //синий
     int winner = score_->winner(); //победитель
-    QMessageBox::information(this,tr("Game over!"),
+    QMessageBox::information(this,tr("Game over!"), //выиграл кто-то у нас
                     tr("%1 player wins a game!").arg(winner?sBlue:sRed));
     newGame(); //новая игра
 }
@@ -263,6 +318,12 @@ int WindowField::random(int max)
     return qrandNum/RAND_MAX*(max+1);
 }
 
+/*=*=*=*=*=*=*=*=*=*=*
+*=*=*=*=*=*=*=*=*=*=*=*
+ \\\\\\   View   //////
+=*=*=*=*=*=*=*=*=*=*=*=
+ =*=*=*=*=*=*=*=*=*=*=*/
+
 View::View(QGraphicsScene *s, WindowField *f) : QGraphicsView(s,f),
     field_(f), mousePressed_(0)
 {
@@ -271,7 +332,7 @@ View::View(QGraphicsScene *s, WindowField *f) : QGraphicsView(s,f),
 
 void View::mousePressEvent(QMouseEvent *e) //кнопка мыши
 {
-    if (field_->isPause()) return;
+    if (field_->isPause()) return; //если пауза, выходим
     mousePressed_ = 1; //если мыши зажата, следить при движении курсора
     int xinc = size().width()/2; //различия координат виджета и объектов
     int yinc = size().height()/2;
@@ -280,9 +341,9 @@ void View::mousePressEvent(QMouseEvent *e) //кнопка мыши
         field_->gamer(i)->mousePress(point);
 }
 
-void View::mouseMoveEvent(QMouseEvent *e)
+void View::mouseMoveEvent(QMouseEvent *e) //двиг мыши
 {
-    if (field_->isPause()) return;
+    if (field_->isPause()) return; //пауза -- выходим / if pause -- quit
     int xinc = size().width()/2; //различия координат виджета и объектов
     int yinc = size().height()/2;
     QPointF point = e->posF()-QPointF(xinc,yinc); //текущая точка
@@ -297,30 +358,30 @@ void View::mouseMoveEvent(QMouseEvent *e)
 
 void View::mouseReleaseEvent(QMouseEvent *)
 {
-    mousePressed_ = 0;
+    mousePressed_ = 0; //кнопка отпущена
 }
 
-void View::keyPressEvent(QKeyEvent *e)
+void View::keyPressEvent(QKeyEvent *e) //нажали клавишу
 {
     if (field_->isPause()) return;
     keys_.insert(e->key());
 
     std::set<int>::iterator it;
-    for (it=keys_.begin(); it!=keys_.end(); it++)
+    for (it=keys_.begin(); it!=keys_.end(); it++) //добавление клавиши
         keyPushed(*it);
 }
 
-void View::keyReleaseEvent(QKeyEvent *e)
+void View::keyReleaseEvent(QKeyEvent *e) //отпустили
 {
     keys_.erase(e->key());
 }
 
-void View::keyPushed(int k)
+void View::keyPushed(int k) //добавление клавиши к списку нажатых
 {
     //показывать подсказки постоянно
     if (k==Qt::Key_C || k==Qt::Key_0)
     {
-        bool letters = k==Qt::Key_C;
+        bool letters = k==Qt::Key_C; //буквы или цифры?
         for (int i=0; i<2; i++)
         {
             Player *player = static_cast<Player*>(field_->gamer(i));

@@ -2,6 +2,40 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="ru_RU">
 <context>
+    <name>AboutDialog</name>
+    <message>
+        <location filename="aboutdialog.ui" line="14"/>
+        <source>About Rong</source>
+        <translation>О программе Rong</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="40"/>
+        <source>Rong is a clone of computer game Pong</source>
+        <translation>Rong -- клон компьютерной игры Pong</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="51"/>
+        <source>(c) 2011 pavertomato(Yegor Lezhnin)
+(c) 2011 zlv(Yevgeny Lezhnin)</source>
+        <translation>(c) 2011 Лежнин Егор
+(c) 2011 Лежнин Евгений</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="73"/>
+        <source>&lt;a href=&apos;https://github.com/zlv/Rong/wiki&apos;&gt;https://github.com/zlv/Rong/wiki&lt;/a&gt;</source>
+        <translation>&lt;a href=&apos;https://github.com/zlv/Rong/wiki/Заглавная&apos;&gt;https://github.com/zlv/Rong/wiki/Заглавная&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>https://github.com/zlv/Rong/wiki</source>
+        <translation type="obsolete">https://github.com/zlv/Rong/wiki/Заглавная</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.ui" line="80"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Закрыть</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="circleofdeath.cpp" line="30"/>
@@ -160,47 +194,61 @@
 <context>
     <name>WindowField</name>
     <message>
-        <location filename="windowfield.cpp" line="180"/>
+        <location filename="windowfield.cpp" line="190"/>
         <source>&amp;New game</source>
         <translation>&amp;Новая игра</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="183"/>
+        <location filename="windowfield.cpp" line="193"/>
         <source>&amp;Set gamers and ball velocity</source>
         <translation>Параметры &amp;игры</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="186"/>
+        <location filename="windowfield.cpp" line="196"/>
         <source>&amp;Pause</source>
         <translation>&amp;Пауза</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="189"/>
+        <location filename="windowfield.cpp" line="199"/>
         <source>&amp;Quit</source>
         <translation>В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="191"/>
-        <source>&amp;File</source>
-        <translation>&amp;Файл</translation>
+        <location filename="windowfield.cpp" line="201"/>
+        <source>&amp;Game</source>
+        <translation>&amp;Игра</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="249"/>
+        <location filename="windowfield.cpp" line="208"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Справка</translation>
+    </message>
+    <message>
+        <location filename="windowfield.cpp" line="209"/>
+        <source>&amp;About Rong</source>
+        <translation>&amp;О программе Rong</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation type="obsolete">&amp;Файл</translation>
+    </message>
+    <message>
+        <location filename="windowfield.cpp" line="268"/>
         <source>Red</source>
         <translation>Красный</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="250"/>
+        <location filename="windowfield.cpp" line="269"/>
         <source>Blue</source>
         <translation>Синий</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="252"/>
+        <location filename="windowfield.cpp" line="271"/>
         <source>Game over!</source>
         <translation>Конец игры!</translation>
     </message>
     <message>
-        <location filename="windowfield.cpp" line="253"/>
+        <location filename="windowfield.cpp" line="272"/>
         <source>%1 player wins a game!</source>
         <translation>%1 игрок победил!</translation>
     </message>

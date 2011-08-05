@@ -3,7 +3,7 @@
 ==   Score -- область в углу [может и не в углу], в которую пишется счёт ==
 == разноцветными цифрами. /                                              ==
 ==                                                                       ==
-==   Score -- game score panel.                                          ==
+==   Score -- game score panel in a corner.                              ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -23,8 +23,9 @@
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #ifndef SCORE_H
 #define SCORE_H
-#include "field.h" //поле, на котором мы
 #include <QGraphicsItem> //графический элемент
+
+class Field;
 
 class Score : public QGraphicsItem
 {

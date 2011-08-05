@@ -1,11 +1,11 @@
 /*=========================================================================
 ==                        windowfield.h                                  ==
 ==   WindowField -- окно, является оболочкой для поля, включает события  ==
-== таймера.                                                              ==
+== таймера, взаимодействие через меню, сигналы всаимодействия объектов.  ==
 ==   View -- виджет рисуемой области, включает в себя события мыши и кла-==
-== виатуры/                                                              ==
+== виатуры /                                                             ==
 ==                                                                       ==
-==   WindowField -- ui for the field.                                    ==
+==   WindowField -- ui for the field, contains timer handle function.    ==
 ==   View -- widget for mouse and keyboard events.                       ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
@@ -28,15 +28,15 @@
 #define WINDOWFIELD_H
 
 #include "field.h" //родитель
-#include "settingsdialog.h" //параметры
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QAction>
+#include <QAction> //меню
 #include <set> //клавиши
 
-class FieldData;
-class View;
+struct FieldData; //данные о поле для игрока
+class SettingsDialog; //диалог свойств
+class View; //внутренности
 
 class WindowField : public QMainWindow, public Field
 {
@@ -45,8 +45,8 @@ class WindowField : public QMainWindow, public Field
 private:
     QGraphicsScene scene_; //сцена для объектов Qt
     SettingsDialog *settingsDialog_; //параметры
-    View *view_; //виджет с элементами
-    bool pause_; //нажата ли кнопка паузы?
+    View *view_; //виджет с элементами / widget with the elements
+    bool pause_; //нажата ли кнопка паузы? / is pause pressed?
     QAction *newGameAction_; //новая игра
     QAction *settingsAction_; //параметры
     QAction *pauseAction_; //пауза
@@ -56,8 +56,9 @@ public:
     WindowField();
     void recreateGamer(int,int); //создать игрока заново
     void update(); //обновить виджет-сцену / update scene widget
-    void timerEvent(QTimerEvent*); //основной таймер приложения
-    bool isPause(); //нажата ли пауза
+    //основной таймер приложения / first and only one timer
+    void timerEvent(QTimerEvent*); //of the application
+    bool isPause(); //нажата ли пауза / is pause button toggled?
     void readSettings(); //читать параметры
     void writeSettings(); //сохранить параметры
 protected:
@@ -66,6 +67,7 @@ private slots:
     void newGame(); //обнулить счёт, начать новую игру
     void showSettings(); //показать диалог настройки
     void pause(); //установить/убрать паузу
+    void about(); //о программе
 private:
     void createMenu(); //создать разные меньюшки
     bool canCreateBonus(); //существует ли возможность создать бонус
@@ -96,9 +98,9 @@ public:
     void mousePressEvent(QMouseEvent*);
     void mouseMoveEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
-    void keyPressEvent(QKeyEvent*);
-    void keyReleaseEvent(QKeyEvent*);
-    void keyPushed(int);
+    void keyPressEvent(QKeyEvent*); //нажали клавишу
+    void keyReleaseEvent(QKeyEvent*); //отпустили
+    void keyPushed(int); //добавление клавиши к списку нажатых
 };
 
 #endif // WINDOWFIELD_H

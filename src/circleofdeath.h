@@ -28,10 +28,11 @@
              pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
 #ifndef CIRCLEOFDEATH_H
 #define CIRCLEOFDEATH_H
-#include "field.h" //поле, на котором размещён круг
 #include <QGraphicsItem> //базовый класс, графический элемент qt
 
+class Field;
 class Platform; //только объявление
+
 class CircleOfDeath : public QGraphicsItem
 {
     Platform *platform_[2]; //вагонетки

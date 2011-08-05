@@ -20,6 +20,7 @@
 #include <QPainter>
 #include <QWidget>
 #include <math.h>
+#include <magnet.h>
 #include <QDebug>
 #include "constants.h"
 #include "circleofdeath.h"
@@ -31,7 +32,7 @@ Ball::Ball(Field *f, double v, QGraphicsItem *parent)  :
     field_(f), pixmap_(62,62), painted_(0),
     color_(WHITE), showed_(1), type(GameBall)
 {
-    setRandomAngleVelocity(v);
+    setRandomAngleVelocity(v); //случайное направление
     drawBall();
 }
 
@@ -40,7 +41,7 @@ Ball::Ball(Field *f, double v, Type t, QString sImg, QGraphicsItem *parent)
     field_(f), pixmap_(sImg), painted_(0),
     color_(WHITE), showed_(1), type(t)
 {
-    if(t==BonusBall)radius_*=3;
+    if(t==BonusBall)radius_*=3; //увеличение размера, если бонус
     setRandomAngleVelocity(v);
 }
 
@@ -90,6 +91,7 @@ void Ball::moveMe()
     if (!painted_ || !showed_) return;
     bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);//если перестаёт пересекаться с кругом смерти
     bool crossPlatform[2];//если пересекается с одной из вагонеток
+    bool crossMagnet = collidesWithItem(field_->magnet_);
     for (int i=0; i<2; i++)//2 вагонетки
     {
         crossPlatform[i] = collidesWithItem(field_->circle()->platform(i));//пересекается ли с iтой вагонеткой
@@ -157,7 +159,10 @@ void Ball::moveMe()
         if(Field::debug)qDebug()<<arc*180/PI;
         //изменение вектора движения шарика
         mirror(arc);
+
     }
+    if(field_->magnet_->showed()&&!crossMagnet)
+         magnetMe();
     //изменение координат шарика в соответствии с вектором движения
     point_=QPointF(point_.x()+vx_,point_.y()+vy_);
 }
@@ -365,12 +370,12 @@ void Ball::changeColor()
     drawBall();
 }
 
-double Ball::velocity()
+double Ball::velocity() //скорость моя (значение)
 {
     return sqrt(vx_*vx_+vy_*vy_);
 }
 
-void Ball::setVelocity(double v)
+void Ball::setVelocity(double v) //поставить скорость по модулю
 {
     if (v<0) return;
     double angle = atan(vy_/vx_);
@@ -378,20 +383,21 @@ void Ball::setVelocity(double v)
     setVelocity(v,angle);
 }
 
+//поставить скорость по углу и модулю
 void Ball::setVelocity(double v, double a)
 {
     vx_ = cos(a)*v;
     vy_ = sin(a)*v;
 }
 
-void Ball::show()
+void Ball::show() //разместить заново
 {
     point_ = QPoint(0,0);
     showed_ = 1;
     setRandomAngleVelocity(sqrt(vx_*vx_+vy_*vy_));
 }
 
-bool Ball::showed()
+bool Ball::showed() //вообще мяч есть?
 {
     return showed_;
 }
@@ -401,7 +407,7 @@ void Ball::hide()
     showed_ = 0;
 }
 
-void Ball::renew()
+void Ball::renew() //обнулить все значения
 {
     color_ = WHITE;
     point_ = QPoint(0,0);
@@ -442,3 +448,44 @@ double Ball::color()
 {
     return color_;
 }
+
+void Ball::magnetMe()
+{
+    chmag(point_.x(),1,0.5);
+    chmag(point_.y(),0,0.8);
+}
+
+void Ball::chmag(double point, bool x, double power)
+{
+    double p=vy_,vel=velocity();
+    if(x)
+        p=vx_;
+    if(point>0)
+        p-=power;
+    else
+        p+=power;
+    if(fabs(p)>fabs(vel))
+    {
+        if(p<0)
+            p=vel*-1;
+        else
+            p=vel;
+    }
+    if(x)
+        vx_=p;
+    else
+        vy_=p;
+    p=sqrt(vel*vel-p*p);
+    if(x)
+        if(vy_<0)
+           vy_=-1*p;
+        else
+           vy_=p;
+    else
+        if(vx_<0)
+           vx_=-1*p;
+        else
+           vx_=p;
+}
+
+

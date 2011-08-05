@@ -1,10 +1,8 @@
 /*=========================================================================
-==                             bonusball.h                               ==
-==   BonusBall -- сын Ball'а, является мячиком, несущим в себе сюрприз,  ==
-== а конкретнее бонус. /                                                 ==
+==                           aboutdialog.h                               ==
+==   AboutDialog -- простое окошко о программе. /                        ==
 ==                                                                       ==
-==   BonusBall -- ball that contains bonus of type vodka, multiball or   ==
-== growing-reduction .                                                   ==
+==   AboutDialog -- simple dialog about Rong.                            ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -20,25 +18,27 @@
 ==  along with this program.  If not, see <http://www.gnu.org/licenses/>.==
 ==                                                                       ==
 =========================================================================*/
-/*Авторы/Authors: pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь
-                       zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь*/
-#ifndef BONUSBALL_H
-#define BONUSBALL_H
-#include "ball.h" //родитель
+/*Авторы/Authors: zlv(Евгений Лежнин) <z_lezhnin@mail2000.ru>, 2011 -- Томск->Сибирь
+             pavertomato(Егор Лежнин) <pavertomato@gmail.com>, 2011 -- Томск->Сибирь*/
+#ifndef ABOUTDIALOG_H
+#define ABOUTDIALOG_H
 
-enum BonusType;
+#include <QDialog>
 
-class BonusBall : public Ball
-{
-    BonusType bonusType_; //тип этого бонусного мяча
+namespace Ui {
+    class AboutDialog; //объявление интерфейса
+}
 
+class AboutDialog : public QDialog //определение класса, здесь ничего осо-
+{                                           //бен-
+    Q_OBJECT                                  //но-
+                                                  //го
 public:
-    BonusBall(Field*,double,Type,QString sImg=QString(""),QGraphicsItem *parent=0);
-    void moveMe(); //движение
-    void setType(BonusType);
-    void show();
+    explicit AboutDialog(QWidget *parent = 0);
+    ~AboutDialog();
+
 private:
-    QString findFileName(BonusType); //имя файла по имени бонуса
+    Ui::AboutDialog *ui;
 };
 
-#endif // BONUSBALL_H
+#endif // ABOUTDIALOG_H

@@ -28,9 +28,12 @@
 
 BonusBall::BonusBall(Field* f, double v, Type t,
                      QString sImg, QGraphicsItem *parent)
-    : Ball(f,v,t,sImg,parent){showed_=0;}
+    : Ball(f,v,t,sImg,parent)
+{
+    showed_=0;
+}
 
-void BonusBall::moveMe()
+void BonusBall::moveMe() //движение
 {
     if (!painted_ || !showed_) return;
     bool crossBorder = !collidesWithItem(field_->circle(),Qt::ContainsItemShape);//если перестаёт пересекаться с кругом смерти
@@ -40,7 +43,7 @@ void BonusBall::moveMe()
     {
         crossPlatform[i] = collidesWithItem(field_->circle()->platform(i));//пересекается ли с iтой вагонеткой
     }
-    if (crossBorder)//если камнулся вагонеток, или перестал касаться круга смерти
+    if (crossBorder)//если каснулся вагонеток, или перестал касаться круга смерти
     {
         double arc;//угол прямой к оси X от которой отражается шарик
         //угол касательной к окружности, в точке, где шарик перестаёт пересекаться с кругом смерти
@@ -57,14 +60,7 @@ void BonusBall::moveMe()
             gamer=1;
         else
             gamer=0;
-        /*if(crossBall)
-        {
-            if (field_->ball()->color()==Ball::RED)
-                gamer=0;
-            else
-                if (field_->ball()->color()==Ball::BLUE)
-                    gamer=1;
-        }*/
+
         field_->setBonusTime(bonusType_,gamer);
         hide();
         return;
@@ -80,7 +76,7 @@ void BonusBall::setType(BonusType bt)
     setImage(findFileName(bt));
 }
 
-QString BonusBall::findFileName(BonusType bt)
+QString BonusBall::findFileName(BonusType bt) //имя файла по имени бонуса
 {
     switch (bt)
     {
@@ -93,4 +89,11 @@ QString BonusBall::findFileName(BonusType bt)
     default:
         return "";
     }
+}
+
+void BonusBall::show()
+{
+    point_ = QPoint(0,0);
+    showed_ = 1;
+    setRandomAngleVelocity(sqrt(vx_*vx_+vy_*vy_));
 }

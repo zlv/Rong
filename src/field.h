@@ -5,7 +5,8 @@
 ==   Структура содержащая разные объекты, которые могут взаимодействовать==
 == друг с другом через это поле. /                                       ==
 ==                                                                       ==
-==   Field -- field, that should contain all gaming objects.             ==
+==   Field -- field, that should contain all gaming objects. Contain all ==
+== game objects: cod, platforms, balls                                   ==
 ==                                                                       ==
 ==  Rong is free software: you can redistribute it and/or modify         ==
 ==  it under the terms of the GNU General Public License as published by ==
@@ -32,9 +33,10 @@ class CircleOfDeath; //круг смерти тоже
 class Gamer; //и они тоже
 class Bonus;
 class BonusBall;
+class Magnet;
 class Score;
 //тип бонуса
-enum BonusType{NoBonus=0,PlusBallsBonus,IncPlatformSizeBonus,
+enum BonusType{NoBonus=0,PlusBallsBonus,IncPlatformSizeBonus,MagnetBonus,
                ChangeDirectionBonus,BonusCount};
 class Field
 {
@@ -61,6 +63,7 @@ public:
     Ball* ball();
     CircleOfDeath* circle();
     Gamer* gamer(int);
+    Magnet *magnet_;
     Score* score();
     //установить параметры бонусов / set bonus settings
     void setBonusTime(BonusType,int);

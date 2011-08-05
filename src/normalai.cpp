@@ -20,6 +20,7 @@
 #include "circleofdeath.h" //круг смерти
 #include "platform.h" //вагонетка
 #include "constants.h" //пи
+#include "field.h" //поле, на нём мы
 #include <math.h>
 
 //угол, который должен быть до мяча, чтобы компьютер сделал шаг

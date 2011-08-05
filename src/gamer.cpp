@@ -20,6 +20,7 @@
 #include "constants.h"
 #include "circleofdeath.h"
 #include "platform.h"
+#include "field.h" //поле, на котором мы
 
 /*====================================*
  *====================================*
