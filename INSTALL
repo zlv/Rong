@@ -1,3 +1,18 @@
-cd src
-qmake CONFIG+="release" && make
-and copy executable (Rong or Rong.exe) to directory, that contains images directory.
+Построение:
+  Выполните последовательно
+    cd src
+    qmake CONFIG+="release" && make
+Установка:
+  Скопируйте исполняемый файл в один каталог с файлом перевода
+(*.qm).
+
+---------------------------------------------------------------------
+
+BUILD:
+  Type this in command line
+    cd src
+    qmake CONFIG+="release" && make
+INSTALL:
+  Copy executable file (Rong*) and translation file (*.qm) to any 
+folder.
+
