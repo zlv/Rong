@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>434</width>
+    <width>471</width>
     <height>420</height>
    </rect>
   </property>
@@ -48,7 +48,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>(c) 2011 pavertomato(Yegor Lezhnin)
+        <string>(c) 2011 pavertomato(Egor Lezhnin)
 (c) 2011 zlv(Yevgeny Lezhnin)</string>
        </property>
       </widget>

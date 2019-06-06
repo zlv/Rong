@@ -336,7 +336,7 @@ void View::mousePressEvent(QMouseEvent *e) //кнопка мыши
     mousePressed_ = 1; //если мыши зажата, следить при движении курсора
     int xinc = size().width()/2; //различия координат виджета и объектов
     int yinc = size().height()/2;
-    QPointF point = e->posF()-QPointF(xinc,yinc); //текущая точка
+    QPointF point = e->localPos()-QPointF(xinc,yinc); //текущая точка
     for (int i=0; i<2; i++) //сообщить каждому игроку
         field_->gamer(i)->mousePress(point);
 }
@@ -346,7 +346,7 @@ void View::mouseMoveEvent(QMouseEvent *e) //двиг мыши
     if (field_->isPause()) return; //пауза -- выходим / if pause -- quit
     int xinc = size().width()/2; //различия координат виджета и объектов
     int yinc = size().height()/2;
-    QPointF point = e->posF()-QPointF(xinc,yinc); //текущая точка
+    QPointF point = e->localPos()-QPointF(xinc,yinc); //текущая точка
     for (int i=0; i<2; i++) //сообщить каждому игроку
     {
         field_->gamer(i)->mouseMoved(point);

@@ -1,3 +1,9 @@
+QT += \
+ core \
+ widgets \
+ gui
+
+
 HEADERS += \
     field.h \
     circleofdeath.h \
